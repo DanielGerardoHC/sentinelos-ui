@@ -24,15 +24,14 @@ jobs:
         cp -r public .next/standalone/public
         mkdir -p .next/standalone/.next
         cp -r .next/static .next/standalone/.next/static
-        
-    - name: 🔄 5. Aplicar actualizacion y reiniciar SentinelOS
+
+    - name: 5. Aplicar actualizacion y reiniciar SentinelOS
       run: |
-        # Vaciamos la carpeta destino por completo
-        sudo rm -rf /srv/sentinelos/ui/*
-        sudo rm -rf /srv/sentinelos/ui/.* 2>/dev/null || true
-        
-        # Copiamos usando "/." al final para forzar copiar los ocultos (.next)
-        sudo cp -a .next/standalone/. /srv/sentinelos/ui/
-        
-        # Reiniciamos el demonio
-        sudo systemctl restart sentinel-ui
+          # Borramos el contenido viejo de forma super segura
+          sudo find /srv/sentinelos/ui -mindepth 1 -delete
+          
+          # Copiamos la nueva version incluyendo archivos ocultos
+          sudo cp -a .next/standalone/. /srv/sentinelos/ui/
+          
+          # Reiniciamos el servidor web
+          sudo systemctl restart sentinel-ui
