@@ -134,7 +134,7 @@ export default function InterfacesPage() {
                                 Edit {selectedIface?.name}
                             </SheetTitle>
                             <SheetDescription className="text-zinc-400 font-mono text-xs">
-                                Modify routing parameters and security zones for this interface.
+                                Modify routing parameters and security zones for this interfaces.
                             </SheetDescription>
                         </SheetHeader>
                     </div>
