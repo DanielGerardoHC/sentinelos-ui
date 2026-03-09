@@ -1,0 +1,37 @@
+name: Deploy SentinelOS UI
+
+on:
+  push:
+    branches: [ "main", "master" ] # Ajusta a la rama que uses
+
+jobs:
+  build-and-deploy:
+    # IMPORTANTE: Esto obliga a GitHub a ejecutar todo en tu Firewall, no en la nube.
+    runs-on: self-hosted
+
+    steps:
+    - name: 📥 1. Descargar último código
+      uses: actions/checkout@v4
+
+    - name: 📦 2. Instalar dependencias
+      run: pnpm install
+
+    - name: 🚀 3. Compilar el artefacto Standalone
+      run: pnpm build
+
+    - name: 📂 4. Ensamblar versión de producción
+      run: |
+        # Copiamos recursos estáticos al standalone
+        cp -r public .next/standalone/public
+        cp -r .next/static .next/standalone/.next/static
+        
+    - name: 🔄 5. Aplicar actualización y reiniciar SentinelOS
+      run: |
+        # Limpiamos la carpeta oficial
+        sudo rm -rf /srv/sentinelos/ui/*
+        
+        # Copiamos el nuevo artefacto ensamblado a la carpeta oficial
+        sudo cp -r .next/standalone/* /srv/sentinelos/ui/
+        
+        # Reiniciamos la interfaz para aplicar los cambios
+        sudo systemctl restart sentinel-ui
