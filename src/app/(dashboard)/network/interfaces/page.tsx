@@ -5,7 +5,7 @@ import { useInterfaces, NetworkInterface } from '@/hooks/useInterfaces';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit2, Eye, Shield, ShieldAlert, Activity, Save, RefreshCw } from "lucide-react";
+import { Edit2, Eye, Shield, ShieldAlert, Activity, Save, RefreshCw, X, Server } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -13,55 +13,55 @@ import {
 } from "@/components/ui/sheet";
 
 export default function InterfacesPage() {
-    // 1. Conectamos nuestro Hook
     const { interfaces, fetchInterfaces, updateInterface, isLoading, error } = useInterfaces();
 
-    // 2. Estados de la Interfaz Visual
+    // Estados del Panel Principal
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [selectedIface, setSelectedIface] = useState<NetworkInterface | null>(null);
 
-    // 3. Estados Controlados para el Formulario (Lo que el usuario edita)
+    // Estados del Formulario
     const [formIp, setFormIp] = useState('');
     const [formZone, setFormZone] = useState('');
+    const [formState, setFormState] = useState(''); // <-- NUEVO: Estado administrativo
     const [formManagement, setFormManagement] = useState<string[]>([]);
 
-    // Cargar datos al abrir la página
+    // Estados del Modal DHCP (Visual)
+    const [isDhcpModalOpen, setIsDhcpModalOpen] = useState(false);
+    const [dhcpEnabled, setDhcpEnabled] = useState(false);
+
     useEffect(() => {
         fetchInterfaces();
     }, [fetchInterfaces]);
 
-    // Cuando el admin da clic en editar, rellenamos el formulario
     const handleEditClick = (iface: NetworkInterface) => {
         setSelectedIface(iface);
         setFormIp(iface.ip || '');
         setFormZone(iface.zone || 'trust');
+        setFormState(iface.state || 'down'); // Cargamos el estado actual
         setFormManagement(iface.management || []);
         setIsSheetOpen(true);
     };
 
-    // Lógica para marcar/desmarcar checkboxes de management
     const toggleManagement = (service: string) => {
         setFormManagement(prev =>
-            prev.includes(service)
-                ? prev.filter(s => s !== service)
-                : [...prev, service]
+            prev.includes(service) ? prev.filter(s => s !== service) : [...prev, service]
         );
     };
 
-    // Ejecutar el flujo de guardado
     const handleSave = async () => {
         if (!selectedIface) return;
 
+        // Ahora enviamos el estado junto con lo demás
         const payload = {
             ip: formIp,
             zone: formZone,
+            state: formState,
             management: formManagement
         };
 
         const success = await updateInterface(selectedIface.name, payload);
-
         if (success) {
-            setIsSheetOpen(false); // Cerramos el panel si todo salió bien
+            setIsSheetOpen(false);
         }
     };
 
@@ -84,14 +84,13 @@ export default function InterfacesPage() {
                 </div>
             </div>
 
-            {/* Alerta de Error General */}
             {error && (
                 <div className="p-4 bg-red-950/50 border border-red-500/50 text-red-400 font-mono flex items-center gap-3 rounded-lg">
                     <ShieldAlert className="w-5 h-5" /> {error}
                 </div>
             )}
 
-            {/* --- DATA TABLE --- */}
+            {/* --- TABLA DE INTERFACES (Sin cambios) --- */}
             <div className="rounded-xl border border-zinc-800 bg-zinc-950/50 overflow-hidden shadow-xl shadow-black/50">
                 <Table>
                     <TableHeader className="bg-zinc-900/80 border-b border-zinc-800">
@@ -106,11 +105,7 @@ export default function InterfacesPage() {
                     </TableHeader>
                     <TableBody>
                         {interfaces.length === 0 && !isLoading && (
-                            <TableRow>
-                                <TableCell colSpan={6} className="text-center py-8 text-zinc-500 font-mono">
-                                    No interfaces found in engine.
-                                </TableCell>
-                            </TableRow>
+                            <TableRow><TableCell colSpan={6} className="text-center py-8 text-zinc-500 font-mono">No interfaces found in engine.</TableCell></TableRow>
                         )}
                         {interfaces.map((iface) => (
                             <TableRow key={iface.name} className="border-b border-zinc-800/50 hover:bg-zinc-900/50 transition-colors group">
@@ -120,40 +115,30 @@ export default function InterfacesPage() {
                                         {iface.name}
                                     </div>
                                 </TableCell>
-
                                 <TableCell>
                                     <div className="flex items-center gap-2">
                                         <span className={`w-2 h-2 rounded-full ${iface.state === 'up' ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-red-500'}`}></span>
                                         <span className="text-zinc-300 font-mono text-xs uppercase tracking-wider">{iface.state}</span>
                                     </div>
                                 </TableCell>
-
                                 <TableCell className="font-mono text-sm text-zinc-300">
                                     {iface.ip ? iface.ip : <span className="text-zinc-600 italic text-xs">Unassigned</span>}
                                 </TableCell>
-
                                 <TableCell>
                                     <Badge variant="outline" className={`font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 ${iface.zone === 'trust' ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10' : 'border-orange-500/30 text-orange-400 bg-orange-500/10'}`}>
                                         {iface.zone === 'trust' ? <Shield className="w-3 h-3 mr-1.5" /> : <ShieldAlert className="w-3 h-3 mr-1.5" />}
                                         {iface.zone}
                                     </Badge>
                                 </TableCell>
-
                                 <TableCell>
                                     <div className="flex gap-1">
                                         {iface.management?.map(mgt => (
-                                            <Badge key={mgt} variant="secondary" className="bg-zinc-800 text-zinc-400 font-mono text-[10px] uppercase tracking-wider">
-                                                {mgt}
-                                            </Badge>
+                                            <Badge key={mgt} variant="secondary" className="bg-zinc-800 text-zinc-400 font-mono text-[10px] uppercase tracking-wider">{mgt}</Badge>
                                         ))}
                                     </div>
                                 </TableCell>
-
                                 <TableCell className="text-right">
                                     <div className="flex justify-end gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-800">
-                                            <Eye className="w-4 h-4" />
-                                        </Button>
                                         <Button variant="ghost" size="icon" onClick={() => handleEditClick(iface)} className="h-8 w-8 text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/10">
                                             <Edit2 className="w-4 h-4" />
                                         </Button>
@@ -165,7 +150,7 @@ export default function InterfacesPage() {
                 </Table>
             </div>
 
-            {/* --- PANEL LATERAL --- */}
+            {/* --- PANEL LATERAL DE EDICIÓN --- */}
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                 <SheetContent className="bg-[#09090b] border-l border-zinc-800 text-zinc-100 sm:max-w-md w-full p-0 flex flex-col h-full">
                     <div className="p-6 border-b border-zinc-800 bg-zinc-950/50">
@@ -175,16 +160,33 @@ export default function InterfacesPage() {
                                 Edit {selectedIface?.name}
                             </SheetTitle>
                             <SheetDescription className="text-zinc-400 font-mono text-xs">
-                                Modify routing parameters and security zones for this interface.
+                                Modify routing parameters, state, and security zones.
                             </SheetDescription>
                         </SheetHeader>
                     </div>
 
                     <div className="p-6 space-y-8 flex-1 overflow-y-auto">
+
+                        {/* NUEVO: Administrative State */}
                         <div className="space-y-3">
                             <Label className="text-zinc-500 font-mono text-xs uppercase tracking-wider flex items-center justify-between">
-                                IPv4 Address / Netmask
-                                <span className="text-emerald-500/50 text-[10px]">CIDR Format</span>
+                                Administrative Status
+                            </Label>
+                            <div className="flex gap-4">
+                                <label className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer transition-colors ${formState === 'up' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]' : 'border-zinc-800 bg-zinc-900/30 text-zinc-500 hover:bg-zinc-800'}`}>
+                                    <input type="radio" name="state" value="up" checked={formState === 'up'} onChange={() => setFormState('up')} className="hidden" />
+                                    <Activity className="w-4 h-4" /> UP
+                                </label>
+                                <label className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer transition-colors ${formState === 'down' ? 'border-red-500 bg-red-500/10 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'border-zinc-800 bg-zinc-900/30 text-zinc-500 hover:bg-zinc-800'}`}>
+                                    <input type="radio" name="state" value="down" checked={formState === 'down'} onChange={() => setFormState('down')} className="hidden" />
+                                    <X className="w-4 h-4" /> DOWN
+                                </label>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3">
+                            <Label className="text-zinc-500 font-mono text-xs uppercase tracking-wider flex items-center justify-between">
+                                IPv4 Address / Netmask <span className="text-emerald-500/50 text-[10px]">CIDR Format</span>
                             </Label>
                             <Input
                                 value={formIp}
@@ -212,10 +214,21 @@ export default function InterfacesPage() {
                             </div>
                         </div>
 
-                        <div className="space-y-4 pt-2">
-                            <Label className="text-zinc-500 font-mono text-xs uppercase tracking-wider border-b border-zinc-800 pb-2 flex w-full">
-                                Administrative Access
-                            </Label>
+                        {/* NUEVO: Botón de Configuración DHCP */}
+                        <div className="space-y-3 border-t border-zinc-800 pt-6">
+                            <Label className="text-zinc-500 font-mono text-xs uppercase tracking-wider">Services</Label>
+                            <Button
+                                variant="outline"
+                                onClick={() => setIsDhcpModalOpen(true)}
+                                className="w-full h-11 bg-zinc-900/50 border-zinc-700 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 font-mono transition-colors"
+                            >
+                                <Server className="w-4 h-4 mr-2" />
+                                Configure DHCP Server
+                            </Button>
+                        </div>
+
+                        <div className="space-y-4 pt-4">
+                            <Label className="text-zinc-500 font-mono text-xs uppercase tracking-wider border-b border-zinc-800 pb-2 flex w-full">Administrative Access</Label>
                             <div className="grid grid-cols-2 gap-4">
                                 {['ping', 'ssh', 'https', 'http'].map(svc => (
                                     <label key={svc} className="flex items-center gap-3 p-3 rounded-lg border border-zinc-800 bg-zinc-900/30 cursor-pointer hover:bg-zinc-800/50 transition-colors group">
@@ -233,9 +246,7 @@ export default function InterfacesPage() {
                     </div>
 
                     <div className="p-6 border-t border-zinc-800 bg-zinc-950/50 flex justify-end gap-3">
-                        <Button variant="outline" onClick={() => setIsSheetOpen(false)} className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 hover:text-white font-mono uppercase text-xs tracking-wider">
-                            Cancel
-                        </Button>
+                        <Button variant="outline" onClick={() => setIsSheetOpen(false)} className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 hover:text-white font-mono uppercase text-xs tracking-wider">Cancel</Button>
                         <Button onClick={handleSave} disabled={isLoading} className="bg-emerald-600 hover:bg-emerald-500 text-white font-mono uppercase text-xs tracking-wider gap-2">
                             <Save className="w-4 h-4" />
                             {isLoading ? 'COMMITTING...' : 'APPLY CHANGES'}
@@ -243,6 +254,70 @@ export default function InterfacesPage() {
                     </div>
                 </SheetContent>
             </Sheet>
+
+            {/* --- MODAL DHCP VISUAL (SUPERPUESTO) --- */}
+            {isDhcpModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-zinc-950 border border-zinc-800 rounded-xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col">
+                        <div className="p-6 border-b border-zinc-800 bg-zinc-900/30 flex items-center justify-between">
+                            <div>
+                                <h3 className="text-lg font-bold font-mono text-zinc-100 flex items-center gap-2">
+                                    <Server className="w-5 h-5 text-emerald-500" />
+                                    DHCP Configuration
+                                </h3>
+                                <p className="text-zinc-500 text-xs font-mono mt-1">Interface: {selectedIface?.name}</p>
+                            </div>
+                            <Button variant="ghost" size="icon" onClick={() => setIsDhcpModalOpen(false)} className="text-zinc-400 hover:text-white">
+                                <X className="w-5 h-5" />
+                            </Button>
+                        </div>
+
+                        <div className="p-6 space-y-6">
+                            <label className="flex items-center gap-3 p-4 rounded-lg border border-emerald-500/30 bg-emerald-500/5 cursor-pointer hover:bg-emerald-500/10 transition-colors">
+                                <input
+                                    type="checkbox"
+                                    checked={dhcpEnabled}
+                                    onChange={() => setDhcpEnabled(!dhcpEnabled)}
+                                    className="w-5 h-5 accent-emerald-500 bg-zinc-900 border-zinc-700"
+                                />
+                                <span className="font-mono text-sm text-emerald-400 font-bold uppercase tracking-wider">Enable DHCP Server on {selectedIface?.name}</span>
+                            </label>
+
+                            <div className={`space-y-4 transition-opacity ${dhcpEnabled ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label className="text-zinc-500 font-mono text-xs uppercase">Range Start</Label>
+                                        <Input className="bg-zinc-900 border-zinc-800 font-mono text-sm text-zinc-300" placeholder="10.20.10.100" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-zinc-500 font-mono text-xs uppercase">Range End</Label>
+                                        <Input className="bg-zinc-900 border-zinc-800 font-mono text-sm text-zinc-300" placeholder="10.20.10.200" />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-zinc-500 font-mono text-xs uppercase">Default Gateway</Label>
+                                    <Input className="bg-zinc-900 border-zinc-800 font-mono text-sm text-zinc-300" placeholder="10.20.10.1" />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label className="text-zinc-500 font-mono text-xs uppercase">Primary DNS</Label>
+                                        <Input className="bg-zinc-900 border-zinc-800 font-mono text-sm text-zinc-300" placeholder="8.8.8.8" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-zinc-500 font-mono text-xs uppercase">Secondary DNS</Label>
+                                        <Input className="bg-zinc-900 border-zinc-800 font-mono text-sm text-zinc-300" placeholder="1.1.1.1" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-6 border-t border-zinc-800 bg-zinc-900/30 flex justify-end gap-3">
+                            <Button variant="outline" onClick={() => setIsDhcpModalOpen(false)} className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 font-mono uppercase text-xs">Close</Button>
+                            <Button onClick={() => setIsDhcpModalOpen(false)} className="bg-emerald-600 hover:bg-emerald-500 text-white font-mono uppercase text-xs">Save DHCP Settings</Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
