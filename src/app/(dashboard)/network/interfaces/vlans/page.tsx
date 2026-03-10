@@ -173,8 +173,8 @@ export default function VlansPage() {
             </div>
 
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                <SheetContent className="bg-[#09090b] border-l border-zinc-800 text-zinc-100 sm:max-w-md w-full p-0 flex flex-col h-full">
-                    <div className="p-6 border-b border-zinc-800 bg-zinc-950/50">
+                <SheetContent className="bg-[#09090b] border-l border-zinc-950/50 text-zinc-100 sm:max-w-md w-full p-0 flex flex-col h-full">
+                    <div className="p-6 border-b border-zinc-950/50 bg-zinc-950/50">
                         <SheetHeader>
                             <SheetTitle className="text-zinc-100 font-mono text-2xl flex items-center gap-3">
                                 <Layers className="w-5 h-5 text-emerald-500" />
@@ -192,13 +192,13 @@ export default function VlansPage() {
 
                             {/* 4. EL SELECTOR MÁGICO DE INTERFAZ PADRE */}
                             <div className="space-y-3">
-                                <Label className="text-zinc-500 font-mono text-xs uppercase">Parent Interface</Label>
+                                <Label className="text-zinc-900/50 font-mono text-xs uppercase">Parent Interface</Label>
                                 <div className="relative">
                                     <select
                                         value={formParent}
                                         onChange={(e) => setFormParent(e.target.value)}
                                         disabled={isEditMode}
-                                        className="w-full h-11 appearance-none rounded-md border border-zinc-800 bg-zinc-900/50 px-3 py-2 text-sm text-zinc-100 font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500/50 disabled:opacity-50"
+                                        className="w-full h-11 appearance-none rounded-md border border-zinc-900/50 bg-zinc-900/50 px-3 py-2 text-sm text-zinc-100 font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500/50 disabled:opacity-50"
                                     >
                                         <option value="" disabled>Select parent...</option>
                                         {physicalInterfaces.map(iface => {
