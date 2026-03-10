@@ -191,7 +191,7 @@ export default function VlansPage() {
                 <SheetContent
                     style={{ right: slideOffset }}
                     // FIX: Hicimos el panel MÁS ANCHO -> sm:max-w-[550px]
-                    className="bg-[#09090b] border-l border-zinc-800 text-zinc-100 sm:max-w-[650px] w-full p-0 flex flex-col h-full transition-all duration-300 ease-in-out z-[50]"
+                    className="bg-[#09090b] border-l border-zinc-800 text-zinc-100 sm:max-w-[350px] w-full p-0 flex flex-col h-full transition-all duration-300 ease-in-out z-[50]"
                 >
                     <div className="p-6 border-b border-zinc-800 bg-zinc-950/50">
                         <SheetHeader>
