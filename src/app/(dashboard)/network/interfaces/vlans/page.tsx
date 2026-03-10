@@ -2,21 +2,24 @@
 
 import { useState, useEffect } from 'react';
 import { useVlans, VlanInterface } from '@/hooks/useVlans';
-// 1. IMPORTAMOS EL HOOK DE INTERFACES FÍSICAS
 import { useInterfaces } from '@/hooks/useInterfaces';
+
+// 1. IMPORTAMOS NUESTROS COMPONENTES MAESTROS
+import { PageHeader } from '@/components/firewall/PageHeader';
+import { StatusBadge, ZoneBadge } from '@/components/firewall/FirewallBadges';
+import { AdminStateSelector } from '@/components/firewall/AdminStateSelector';
+import { ManagementSelector } from '@/components/firewall/ManagementSelector';
 import DhcpModal from '@/components/DhcpModal';
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Edit2, Shield, ShieldAlert, Layers, Save, RefreshCw, Activity, X, Server, Trash2 } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Edit2, ShieldAlert, Layers, Save, Server, Trash2 } from "lucide-react";
 
 export default function VlansPage() {
     const { vlans, fetchVlans, saveVlan, deleteVlan, isLoading, error } = useVlans();
-
-    // 2. EXTRAEMOS LAS INTERFACES FÍSICAS PARA EL DROPDOWN
     const { interfaces: physicalInterfaces, fetchInterfaces: fetchPhysicalInterfaces } = useInterfaces();
 
     const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -34,7 +37,6 @@ export default function VlansPage() {
 
     useEffect(() => {
         fetchVlans();
-        // 3. CARGAMOS LAS INTERFACES FÍSICAS AL ENTRAR A LA PÁGINA
         fetchPhysicalInterfaces();
     }, [fetchVlans, fetchPhysicalInterfaces]);
 
@@ -71,7 +73,6 @@ export default function VlansPage() {
     const handleSave = async () => {
         if (!formId || !formParent) return alert("VLAN ID and Parent Interface are required.");
 
-        // Validación extra de seguridad (Capa 3) por si el usuario burla el frontend
         const parentInterface = physicalInterfaces.find(iface => iface.name === formParent);
         if (parentInterface && parentInterface.ip) {
             return alert(`Cannot use ${formParent} as parent. It has an IP assigned (Layer 3 active). Remove its IP first.`);
@@ -98,20 +99,16 @@ export default function VlansPage() {
 
     return (
         <div className="space-y-6 relative">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold text-zinc-100 font-mono tracking-tight">Virtual LANs (802.1Q)</h1>
-                    <p className="text-zinc-400 mt-1 text-sm">Create and manage VLAN sub-interfaces.</p>
-                </div>
-                <div className="flex gap-2">
-                    <Button variant="outline" onClick={fetchVlans} disabled={isLoading} className="border-zinc-800 bg-zinc-950 text-zinc-300 hover:text-white hover:bg-zinc-900">
-                        <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                    </Button>
-                    <Button onClick={handleAddClick} className="bg-emerald-600 hover:bg-emerald-500 text-white font-mono uppercase tracking-wider text-xs shadow-[0_0_15px_rgba(16,185,129,0.2)] hover:shadow-[0_0_20px_rgba(16,185,129,0.4)]">
-                        + Add VLAN
-                    </Button>
-                </div>
-            </div>
+
+            {/* COMPONENTE: Cabecera */}
+            <PageHeader
+                title="Virtual LANs (802.1Q)"
+                description="Create and manage VLAN sub-interfaces."
+                isLoading={isLoading}
+                onRefresh={fetchVlans}
+                onAdd={handleAddClick}
+                addText="+ Add VLAN"
+            />
 
             {error && (
                 <div className="p-4 bg-red-950/50 border border-red-500/50 text-red-400 font-mono flex items-center gap-3 rounded-lg">
@@ -144,18 +141,19 @@ export default function VlansPage() {
                                         <span className="text-[10px] text-zinc-500">on {vlan.parent}</span>
                                     </div>
                                 </TableCell>
+
+                                {/* COMPONENTE: Badge de Estado */}
                                 <TableCell>
-                                    <div className="flex items-center gap-2">
-                                        <span className={`w-2 h-2 rounded-full ${vlan.state === 'up' ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`}></span>
-                                        <span className="text-zinc-300 font-mono text-xs uppercase">{vlan.state}</span>
-                                    </div>
+                                    <StatusBadge state={vlan.state} />
                                 </TableCell>
+
                                 <TableCell className="font-mono text-sm text-zinc-300">{vlan.ip || 'Unassigned'}</TableCell>
+
+                                {/* COMPONENTE: Badge de Zona */}
                                 <TableCell>
-                                    <Badge variant="outline" className={`font-mono text-[10px] uppercase px-2 py-0.5 ${vlan.zone === 'trust' ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10' : 'border-orange-500/30 text-orange-400 bg-orange-500/10'}`}>
-                                        {vlan.zone}
-                                    </Badge>
+                                    <ZoneBadge zone={vlan.zone} />
                                 </TableCell>
+
                                 <TableCell className="text-right">
                                     <div className="flex justify-end gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
                                         <Button variant="ghost" size="icon" onClick={() => handleEditClick(vlan)} className="h-8 w-8 text-zinc-400 hover:text-emerald-400">
@@ -173,8 +171,8 @@ export default function VlansPage() {
             </div>
 
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                <SheetContent className="bg-[#09090b] border-l border-zinc-950/50 text-zinc-100 sm:max-w-md w-full p-0 flex flex-col h-full">
-                    <div className="p-6 border-b border-zinc-950/50 bg-zinc-950/50">
+                <SheetContent className="bg-[#09090b] border-l border-zinc-800 text-zinc-100 sm:max-w-md w-full p-0 flex flex-col h-full">
+                    <div className="p-6 border-b border-zinc-800 bg-zinc-950/50">
                         <SheetHeader>
                             <SheetTitle className="text-zinc-100 font-mono text-2xl flex items-center gap-3">
                                 <Layers className="w-5 h-5 text-emerald-500" />
@@ -187,24 +185,25 @@ export default function VlansPage() {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-3">
                                 <Label className="text-zinc-500 font-mono text-xs uppercase">VLAN ID (Tag)</Label>
-                                <Input type="number" value={formId} onChange={(e) => setFormId(e.target.value ? Number(e.target.value) : '')} disabled={isEditMode} className="bg-zinc-900/50 border-zinc-800 text-emerald-400 font-mono focus-visible:ring-emerald-500/50 h-11" placeholder="e.g. 10" />
+                                <Input type="number" value={formId} onChange={(e) => setFormId(e.target.value ? Number(e.target.value) : '')} disabled={isEditMode} className="bg-zinc-950 border-zinc-800 text-emerald-400 font-mono focus-visible:ring-emerald-500/50 h-11" placeholder="e.g. 10" />
                             </div>
 
-                            {/* 4. EL SELECTOR MÁGICO DE INTERFAZ PADRE */}
                             <div className="space-y-3">
-                                <Label className="text-zinc-900/50 font-mono text-xs uppercase">Parent Interface</Label>
+                                {/* FIX DE ESTILO: Color corregido a text-zinc-500 */}
+                                <Label className="text-zinc-500 font-mono text-xs uppercase">Parent Interface</Label>
                                 <div className="relative">
+                                    {/* FIX DE ESTILO: bg-zinc-950 para contraste puro */}
                                     <select
                                         value={formParent}
                                         onChange={(e) => setFormParent(e.target.value)}
                                         disabled={isEditMode}
-                                        className="w-full h-11 appearance-none rounded-md border border-zinc-900/50 bg-zinc-900/50 px-3 py-2 text-sm text-zinc-100 font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500/50 disabled:opacity-50"
+                                        className="w-full h-11 appearance-none rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500/50 disabled:opacity-50"
                                     >
-                                        <option value="" disabled>Select parent...</option>
+                                        <option value="" disabled className="bg-zinc-950 text-zinc-500">Select parent...</option>
                                         {physicalInterfaces.map(iface => {
-                                            const hasIp = !!iface.ip; // Verificamos si tiene IP
+                                            const hasIp = !!iface.ip;
                                             return (
-                                                <option key={iface.name} value={iface.name} disabled={hasIp}>
+                                                <option key={iface.name} value={iface.name} disabled={hasIp} className="bg-zinc-950 text-zinc-300 disabled:text-zinc-600">
                                                     {iface.name} {hasIp ? '(L3 Active - Invalid)' : '(L2 Ready)'}
                                                 </option>
                                             );
@@ -217,34 +216,31 @@ export default function VlansPage() {
                             </div>
                         </div>
 
-                        {/* ... (El resto del formulario se mantiene idéntico) ... */}
-
-                        <div className="space-y-3">
-                            <Label className="text-zinc-500 font-mono text-xs uppercase">Administrative Status</Label>
-                            <div className="flex gap-4">
-                                <label className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer ${formState === 'up' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400' : 'border-zinc-800 bg-zinc-900/30 text-zinc-500'}`}>
-                                    <input type="radio" value="up" checked={formState === 'up'} onChange={() => setFormState('up')} className="hidden" />
-                                    <Activity className="w-4 h-4" /> UP
-                                </label>
-                                <label className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer ${formState === 'down' ? 'border-red-500 bg-red-500/10 text-red-400' : 'border-zinc-800 bg-zinc-900/30 text-zinc-500'}`}>
-                                    <input type="radio" value="down" checked={formState === 'down'} onChange={() => setFormState('down')} className="hidden" />
-                                    <X className="w-4 h-4" /> DOWN
-                                </label>
-                            </div>
-                        </div>
+                        {/* COMPONENTE: Selector UP/DOWN */}
+                        <AdminStateSelector value={formState} onChange={setFormState} />
 
                         <div className="space-y-3">
                             <Label className="text-zinc-500 font-mono text-xs uppercase">IPv4 Address (CIDR)</Label>
-                            <Input value={formIp} onChange={(e) => setFormIp(e.target.value)} className="bg-zinc-900/50 border-zinc-800 text-emerald-400 font-mono h-11" placeholder="e.g. 10.21.0.1/24" />
+                            <Input value={formIp} onChange={(e) => setFormIp(e.target.value)} className="bg-zinc-950 border-zinc-800 text-emerald-400 font-mono h-11" placeholder="e.g. 10.21.0.1/24" />
                         </div>
 
                         <div className="space-y-3">
                             <Label className="text-zinc-500 font-mono text-xs uppercase">Security Zone</Label>
-                            <select value={formZone} onChange={(e) => setFormZone(e.target.value)} className="w-full h-11 rounded-md border border-zinc-800 bg-zinc-900/50 px-3 py-2 text-zinc-100 font-mono">
-                                <option value="trust">Trust (LAN)</option>
-                                <option value="untrust">Untrust (WAN)</option>
-                                <option value="dmz">DMZ (Servers)</option>
-                            </select>
+                            <div className="relative">
+                                {/* FIX DE ESTILO: bg-zinc-950 y flechita añadida para consistencia visual */}
+                                <select
+                                    value={formZone}
+                                    onChange={(e) => setFormZone(e.target.value)}
+                                    className="w-full h-11 appearance-none rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                                >
+                                    <option value="trust" className="bg-zinc-950 text-zinc-300">Trust (LAN)</option>
+                                    <option value="untrust" className="bg-zinc-950 text-zinc-300">Untrust (WAN)</option>
+                                    <option value="dmz" className="bg-zinc-950 text-zinc-300">DMZ (Servers)</option>
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
+                                    <svg className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
+                            </div>
                         </div>
 
                         {isEditMode && (
@@ -256,17 +252,9 @@ export default function VlansPage() {
                             </div>
                         )}
 
-                        <div className="space-y-4 pt-4 border-t border-zinc-800">
-                            <Label className="text-zinc-500 font-mono text-xs uppercase">Administrative Access</Label>
-                            <div className="grid grid-cols-2 gap-4">
-                                {['ping', 'ssh', 'https'].map(svc => (
-                                    <label key={svc} className="flex items-center gap-3 p-3 rounded-lg border border-zinc-800 bg-zinc-900/30 cursor-pointer hover:bg-zinc-800/50">
-                                        <input type="checkbox" checked={formManagement.includes(svc)} onChange={() => toggleManagement(svc)} className="w-4 h-4 accent-emerald-500 bg-zinc-900 border-zinc-700" />
-                                        <span className="font-mono text-sm text-zinc-300 uppercase">{svc}</span>
-                                    </label>
-                                ))}
-                            </div>
-                        </div>
+                        {/* COMPONENTE: Selector de Servicios (Ping, SSH, etc.) */}
+                        <ManagementSelector selectedServices={formManagement} onChange={toggleManagement} />
+
                     </div>
 
                     <div className="p-6 border-t border-zinc-800 bg-zinc-950/50 flex justify-end gap-3">
