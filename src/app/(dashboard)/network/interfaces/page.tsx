@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useInterfaces, NetworkInterface } from '@/hooks/useInterfaces';
+import DhcpModal from '@/components/DhcpModal'; // <-- IMPORTAMOS EL MODAL REUTILIZABLE
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,12 +23,11 @@ export default function InterfacesPage() {
     // Estados del Formulario
     const [formIp, setFormIp] = useState('');
     const [formZone, setFormZone] = useState('');
-    const [formState, setFormState] = useState(''); // <-- NUEVO: Estado administrativo
+    const [formState, setFormState] = useState('');
     const [formManagement, setFormManagement] = useState<string[]>([]);
 
-    // Estados del Modal DHCP (Visual)
+    // Estado para abrir/cerrar el modal (La lógica interna del DHCP ya vive en el componente)
     const [isDhcpModalOpen, setIsDhcpModalOpen] = useState(false);
-    const [dhcpEnabled, setDhcpEnabled] = useState(false);
 
     useEffect(() => {
         fetchInterfaces();
@@ -37,7 +37,7 @@ export default function InterfacesPage() {
         setSelectedIface(iface);
         setFormIp(iface.ip || '');
         setFormZone(iface.zone || 'trust');
-        setFormState(iface.state || 'down'); // Cargamos el estado actual
+        setFormState(iface.state || 'down');
         setFormManagement(iface.management || []);
         setIsSheetOpen(true);
     };
@@ -51,7 +51,6 @@ export default function InterfacesPage() {
     const handleSave = async () => {
         if (!selectedIface) return;
 
-        // Ahora enviamos el estado junto con lo demás
         const payload = {
             ip: formIp,
             zone: formZone,
@@ -90,7 +89,7 @@ export default function InterfacesPage() {
                 </div>
             )}
 
-            {/* --- TABLA DE INTERFACES (Sin cambios) --- */}
+            {/* --- TABLA DE INTERFACES --- */}
             <div className="rounded-xl border border-zinc-800 bg-zinc-950/50 overflow-hidden shadow-xl shadow-black/50">
                 <Table>
                     <TableHeader className="bg-zinc-900/80 border-b border-zinc-800">
@@ -166,8 +165,6 @@ export default function InterfacesPage() {
                     </div>
 
                     <div className="p-6 space-y-8 flex-1 overflow-y-auto">
-
-                        {/* NUEVO: Administrative State */}
                         <div className="space-y-3">
                             <Label className="text-zinc-500 font-mono text-xs uppercase tracking-wider flex items-center justify-between">
                                 Administrative Status
@@ -214,7 +211,7 @@ export default function InterfacesPage() {
                             </div>
                         </div>
 
-                        {/* NUEVO: Botón de Configuración DHCP */}
+                        {/* Botón de Configuración DHCP */}
                         <div className="space-y-3 border-t border-zinc-800 pt-6">
                             <Label className="text-zinc-500 font-mono text-xs uppercase tracking-wider">Services</Label>
                             <Button
@@ -255,69 +252,12 @@ export default function InterfacesPage() {
                 </SheetContent>
             </Sheet>
 
-            {/* --- MODAL DHCP VISUAL (SUPERPUESTO) --- */}
-            {isDhcpModalOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                    <div className="bg-zinc-950 border border-zinc-800 rounded-xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col">
-                        <div className="p-6 border-b border-zinc-800 bg-zinc-900/30 flex items-center justify-between">
-                            <div>
-                                <h3 className="text-lg font-bold font-mono text-zinc-100 flex items-center gap-2">
-                                    <Server className="w-5 h-5 text-emerald-500" />
-                                    DHCP Configuration
-                                </h3>
-                                <p className="text-zinc-500 text-xs font-mono mt-1">Interface: {selectedIface?.name}</p>
-                            </div>
-                            <Button variant="ghost" size="icon" onClick={() => setIsDhcpModalOpen(false)} className="text-zinc-400 hover:text-white">
-                                <X className="w-5 h-5" />
-                            </Button>
-                        </div>
-
-                        <div className="p-6 space-y-6">
-                            <label className="flex items-center gap-3 p-4 rounded-lg border border-emerald-500/30 bg-emerald-500/5 cursor-pointer hover:bg-emerald-500/10 transition-colors">
-                                <input
-                                    type="checkbox"
-                                    checked={dhcpEnabled}
-                                    onChange={() => setDhcpEnabled(!dhcpEnabled)}
-                                    className="w-5 h-5 accent-emerald-500 bg-zinc-900 border-zinc-700"
-                                />
-                                <span className="font-mono text-sm text-emerald-400 font-bold uppercase tracking-wider">Enable DHCP Server on {selectedIface?.name}</span>
-                            </label>
-
-                            <div className={`space-y-4 transition-opacity ${dhcpEnabled ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label className="text-zinc-500 font-mono text-xs uppercase">Range Start</Label>
-                                        <Input className="bg-zinc-900 border-zinc-800 font-mono text-sm text-zinc-300" placeholder="10.20.10.100" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label className="text-zinc-500 font-mono text-xs uppercase">Range End</Label>
-                                        <Input className="bg-zinc-900 border-zinc-800 font-mono text-sm text-zinc-300" placeholder="10.20.10.200" />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-zinc-500 font-mono text-xs uppercase">Default Gateway</Label>
-                                    <Input className="bg-zinc-900 border-zinc-800 font-mono text-sm text-zinc-300" placeholder="10.20.10.1" />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label className="text-zinc-500 font-mono text-xs uppercase">Primary DNS</Label>
-                                        <Input className="bg-zinc-900 border-zinc-800 font-mono text-sm text-zinc-300" placeholder="8.8.8.8" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label className="text-zinc-500 font-mono text-xs uppercase">Secondary DNS</Label>
-                                        <Input className="bg-zinc-900 border-zinc-800 font-mono text-sm text-zinc-300" placeholder="1.1.1.1" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="p-6 border-t border-zinc-800 bg-zinc-900/30 flex justify-end gap-3">
-                            <Button variant="outline" onClick={() => setIsDhcpModalOpen(false)} className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 font-mono uppercase text-xs">Close</Button>
-                            <Button onClick={() => setIsDhcpModalOpen(false)} className="bg-emerald-600 hover:bg-emerald-500 text-white font-mono uppercase text-xs">Save DHCP Settings</Button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Inyectamos el componente reutilizable de DHCP de forma limpia y elegante */}
+            <DhcpModal
+                isOpen={isDhcpModalOpen}
+                onClose={() => setIsDhcpModalOpen(false)}
+                interfaceName={selectedIface?.name || ''}
+            />
         </div>
     );
 }

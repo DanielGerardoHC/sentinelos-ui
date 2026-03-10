@@ -9,7 +9,13 @@ import { Shield } from 'lucide-react'; // Usaremos esto en lugar del logo tempor
 // opciones dinamicas para el menu izquierdo
 const sidebarData = {
     network: [
-        { label: 'Interfaces', ariaLabel: 'Interfaces', link: '/network/interfaces' },
+        { label: 'Interfaces',
+            ariaLabel: 'Interfaces',
+            link: '/network/interfaces',
+            subItems: [
+                { label: 'Vlans', link: '/network/vlans' }
+            ]
+        },
         { label: 'Routing', ariaLabel: 'Routing', link: '/network/routing' },
         { label: 'VLANs & VXLAN', ariaLabel: 'VLANs', link: '/network/vlans' },
     ],
