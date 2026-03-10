@@ -46,9 +46,9 @@ export function ResourceSelector({ label, value, onChange, options, onEditClick,
                 {onEditClick && (
                     <Button
                         type="button"
-                        variant="outline"
+                        variant="ghost"
                         onClick={onEditClick}
-                        className="h-11 w-11 shrink-0 border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-emerald-400 hover:border-emerald-500/50 hover:bg-emerald-500/10 transition-colors"
+                        className="h-11 w-11 shrink-0 border border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-emerald-400 hover:border-emerald-500/50 hover:bg-emerald-500/10 transition-colors"
                     >
                         <Edit2 className="w-4 h-4" />
                     </Button>

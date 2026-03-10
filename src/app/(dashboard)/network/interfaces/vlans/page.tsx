@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Edit2, ShieldAlert, Layers, Save, Server, Trash2, Activity } from "lucide-react";
+import {InterfaceEditDrawer} from "@/components/firewall/InterfaceEditDrawer";
 
 export default function VlansPage() {
     const { vlans, fetchVlans, saveVlan, deleteVlan, isLoading, error } = useVlans();
@@ -124,45 +125,28 @@ export default function VlansPage() {
     // Determina si el panel principal debe moverse a la izquierda
     const isAnySubSheetOpen = isZoneSheetOpen || isParentSheetOpen;
 
+// Encontramos el objeto completo de la interfaz padre seleccionada para pasarlo al cajón
+    const selectedParentInterfaceObj = physicalInterfaces.find(i => i.name === formParent) || null;
+
+    // Si abrimos la Zona deslizamos 448px (ancho normal), si abrimos el Padre deslizamos 500px (el nuevo ancho)
+    const slideOffset = isParentSheetOpen ? '500px' : (isZoneSheetOpen ? '448px' : '0px');
+
     return (
         <div className="space-y-6 relative overflow-hidden">
 
-            <PageHeader
-                title="Virtual LANs (802.1Q)"
-                description="Create and manage VLAN sub-interfaces."
-                isLoading={isLoading}
-                onRefresh={fetchVlans}
-                onAdd={handleAddClick}
-                addText="+ Add VLAN"
-            />
+            <PageHeader title="Virtual LANs (802.1Q)" description="Create and manage VLAN sub-interfaces." isLoading={isLoading} onRefresh={fetchVlans} onAdd={handleAddClick} addText="+ Add VLAN" />
 
-            {error && (
-                <div className="p-4 bg-red-950/50 border border-red-500/50 text-red-400 font-mono flex items-center gap-3 rounded-lg">
-                    <ShieldAlert className="w-5 h-5" /> {error}
-                </div>
-            )}
+            {error && (<div className="p-4 bg-red-950/50 border border-red-500/50 text-red-400 font-mono flex items-center gap-3 rounded-lg"><ShieldAlert className="w-5 h-5" /> {error}</div>)}
 
-            {/* TABLA CORREGIDA Y ALINEADA */}
             <FirewallTable columns={tableColumns} isEmpty={vlans.length === 0} isLoading={isLoading} emptyMessage="No VLANs found.">
                 {vlans.map((vlan) => (
-                    <TableRow key={vlan.name} className="border-b border-zinc-800/50 hover:bg-zinc-900/50 transition-colors group">
-                        <TableCell className="font-mono font-medium text-emerald-400">
-                            <div className="flex items-center gap-2">
-                                <Activity className="w-4 h-4 text-zinc-600 group-hover:text-emerald-500 transition-colors" />
-                                {vlan.name}
-                            </div>
-                        </TableCell>
+                    <TableRow key={vlan.name} className="border-b border-zinc-800/50 hover:bg-zinc-900/50 group">
+                        <TableCell className="font-mono font-medium text-emerald-400"><div className="flex items-center gap-2"><Activity className="w-4 h-4 text-zinc-600 group-hover:text-emerald-500" />{vlan.name}</div></TableCell>
                         <TableCell className="font-mono text-zinc-400">{vlan.parent}</TableCell>
                         <TableCell><StatusBadge state={vlan.state} /></TableCell>
                         <TableCell className="font-mono text-sm text-zinc-300">{vlan.ip || <span className="text-zinc-600 italic text-xs">Unassigned</span>}</TableCell>
                         <TableCell><ZoneBadge zone={vlan.zone} /></TableCell>
-                        <TableCell>
-                            <div className="flex gap-1">
-                                {vlan.management?.map(mgt => (
-                                    <span key={mgt} className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 font-mono text-[10px] uppercase tracking-wider">{mgt}</span>
-                                ))}
-                            </div>
-                        </TableCell>
+                        <TableCell><div className="flex gap-1">{vlan.management?.map(mgt => (<span key={mgt} className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 font-mono text-[10px] uppercase tracking-wider">{mgt}</span>))}</div></TableCell>
                         <TableCell className="text-right">
                             <div className="flex justify-end gap-1 opacity-50 group-hover:opacity-100 transition-all">
                                 <Button variant="ghost" size="icon" onClick={() => handleEditClick(vlan)} className="h-8 w-8 text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/10"><Edit2 className="w-4 h-4" /></Button>
@@ -173,37 +157,23 @@ export default function VlansPage() {
                 ))}
             </FirewallTable>
 
-            {/* PANEL PRINCIPAL (NIVEL 1) */}
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                 <SheetContent
-                    style={{ right: isAnySubSheetOpen ? '448px' : '0px' }} // LA MAGIA DEL DESLIZAMIENTO
-                    className="bg-[#09090b] border-l border-zinc-800 text-zinc-100 sm:max-w-md w-full p-0 flex flex-col h-full transition-all duration-300 ease-in-out"
+                    style={{ right: slideOffset }} // DESLIZAMIENTO DINÁMICO
+                    className="bg-[#09090b] border-l border-zinc-800 text-zinc-100 sm:max-w-md w-full p-0 flex flex-col h-full transition-all duration-300 z-[50]"
                 >
                     <div className="p-6 border-b border-zinc-800 bg-zinc-950/50">
-                        <SheetHeader>
-                            <SheetTitle className="text-zinc-100 font-mono text-2xl flex items-center gap-3">
-                                <Layers className="w-5 h-5 text-emerald-500" />
-                                {isEditMode ? `Edit VLAN ${formId}` : 'Create New VLAN'}
-                            </SheetTitle>
-                        </SheetHeader>
+                        <SheetHeader><SheetTitle className="text-zinc-100 font-mono text-2xl flex items-center gap-3"><Layers className="w-5 h-5 text-emerald-500" />{isEditMode ? `Edit VLAN ${formId}` : 'Create New VLAN'}</SheetTitle></SheetHeader>
                     </div>
 
                     <div className="p-6 space-y-6 flex-1 overflow-y-auto">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-3">
                                 <Label className="text-zinc-500 font-mono text-xs uppercase">VLAN ID (Tag)</Label>
-                                <Input type="number" value={formId} onChange={(e) => setFormId(e.target.value ? Number(e.target.value) : '')} disabled={isEditMode} className="bg-zinc-950 border-zinc-800 text-emerald-400 font-mono focus-visible:ring-emerald-500/50 h-11" placeholder="e.g. 10" />
+                                <Input type="number" value={formId} onChange={(e) => setFormId(e.target.value ? Number(e.target.value) : '')} disabled={isEditMode} className="bg-zinc-950 border-zinc-800 text-emerald-400 font-mono h-11" placeholder="e.g. 10" />
                             </div>
 
-                            {/* SELECTOR DE INTERFAZ PADRE CON LÁPIZ */}
-                            <ResourceSelector
-                                label="Parent Interface"
-                                value={formParent}
-                                onChange={setFormParent}
-                                options={parentOptions}
-                                disabled={isEditMode} // En Fortinet, no puedes cambiar el padre tras crearlo
-                                onEditClick={() => setIsParentSheetOpen(true)} // Abre el Panel de Padre
-                            />
+                            <ResourceSelector label="Parent Interface" value={formParent} onChange={setFormParent} options={parentOptions} disabled={isEditMode} onEditClick={() => setIsParentSheetOpen(true)} />
                         </div>
 
                         <AdminStateSelector value={formState} onChange={setFormState} />
@@ -213,66 +183,35 @@ export default function VlansPage() {
                             <Input value={formIp} onChange={(e) => setFormIp(e.target.value)} className="bg-zinc-950 border-zinc-800 text-emerald-400 font-mono h-11" placeholder="e.g. 10.21.0.1/24" />
                         </div>
 
-                        {/* SELECTOR DE ZONA CON LÁPIZ */}
-                        <ResourceSelector
-                            label="Security Zone"
-                            value={formZone}
-                            onChange={setFormZone}
-                            options={dynamicZoneOptions}
-                            onEditClick={() => setIsZoneSheetOpen(true)} // Abre el Panel de Zona
-                        />
+                        <ResourceSelector label="Security Zone" value={formZone} onChange={setFormZone} options={dynamicZoneOptions} onEditClick={() => setIsZoneSheetOpen(true)} />
 
                         {isEditMode && (
                             <div className="space-y-3 border-t border-zinc-800 pt-6">
                                 <Label className="text-zinc-500 font-mono text-xs uppercase tracking-wider">Services</Label>
-                                <Button variant="outline" onClick={() => setIsDhcpModalOpen(true)} className="w-full h-11 bg-zinc-950 border-zinc-700 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 font-mono">
-                                    <Server className="w-4 h-4 mr-2" /> Configure DHCP Server
-                                </Button>
+                                <Button variant="outline" onClick={() => setIsDhcpModalOpen(true)} className="w-full h-11 bg-zinc-950 border-zinc-700 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 font-mono"><Server className="w-4 h-4 mr-2" /> Configure DHCP Server</Button>
                             </div>
                         )}
-
                         <ManagementSelector selectedServices={formManagement} onChange={toggleManagement} />
                     </div>
 
                     <div className="p-6 border-t border-zinc-800 bg-zinc-950/50 flex justify-end gap-3">
                         <Button variant="outline" onClick={() => setIsSheetOpen(false)} className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 font-mono uppercase text-xs">Cancel</Button>
-                        <Button onClick={handleSave} disabled={isLoading} className="bg-emerald-600 hover:bg-emerald-500 text-white font-mono uppercase text-xs">
-                            <Save className="w-4 h-4 mr-2" /> {isLoading ? 'COMMITTING...' : 'APPLY CHANGES'}
-                        </Button>
+                        <Button onClick={handleSave} disabled={isLoading} className="bg-emerald-600 hover:bg-emerald-500 text-white font-mono uppercase text-xs"><Save className="w-4 h-4 mr-2" /> {isLoading ? 'COMMITTING...' : 'APPLY CHANGES'}</Button>
                     </div>
                 </SheetContent>
             </Sheet>
 
-            {/* PANEL LATERAL SECUNDARIO (ZONA) */}
+            {/* AHORA SÍ, NUESTROS CAJONES REALES Y FUNCIONALES */}
             <ZoneEditDrawer isOpen={isZoneSheetOpen} onClose={() => setIsZoneSheetOpen(false)} zoneName={formZone} />
 
-            {/* PANEL LATERAL SECUNDARIO (INTERFAZ PADRE - PLACEHOLDER) */}
-            <Sheet open={isParentSheetOpen} onOpenChange={setIsParentSheetOpen}>
-                <SheetContent className="bg-zinc-950 border-l border-zinc-800 text-zinc-100 sm:max-w-md w-full p-0 flex flex-col h-full shadow-2xl shadow-black">
-                    <div className="p-6 border-b border-zinc-800 bg-zinc-900/30">
-                        <SheetHeader>
-                            <SheetTitle className="text-zinc-100 font-mono text-xl flex items-center gap-3">
-                                <Activity className="w-5 h-5 text-emerald-500" />
-                                Edit Parent: {formParent || 'None'}
-                            </SheetTitle>
-                            <SheetDescription className="text-zinc-400 font-mono text-xs">
-                                Configure physical interface parameters directly from here.
-                            </SheetDescription>
-                        </SheetHeader>
-                    </div>
-                    <div className="p-6 space-y-6 flex-1 overflow-y-auto">
-                        <p className="text-zinc-500 text-sm font-mono">
-                            // Aquí cargaremos el componente de edición de interfaces físicas en el futuro.<br/><br/>
-                            This allows configuring the parent interface without losing your VLAN context.
-                        </p>
-                    </div>
-                    <div className="p-6 border-t border-zinc-800 bg-zinc-900/30 flex justify-end gap-3">
-                        <Button variant="outline" onClick={() => setIsParentSheetOpen(false)} className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 font-mono text-xs uppercase">Back</Button>
-                    </div>
-                </SheetContent>
-            </Sheet>
+            {/* NO OLVIDES IMPORTAR ESTE COMPONENTE ARRIBA: import { InterfaceEditDrawer } from '@/components/firewall/InterfaceEditDrawer'; */}
+            <InterfaceEditDrawer
+                isOpen={isParentSheetOpen}
+                onClose={() => setIsParentSheetOpen(false)}
+                iface={selectedParentInterfaceObj}
+                onSuccess={fetchPhysicalInterfaces} // Recarga la tabla si cambiamos el padre
+            />
 
-            {/* MODAL SUPERPUESTO */}
             <DhcpModal isOpen={isDhcpModalOpen} onClose={() => setIsDhcpModalOpen(false)} interfaceName={`${formParent}.${formId}`} />
         </div>
     );
