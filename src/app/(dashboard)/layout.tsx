@@ -13,7 +13,7 @@ const sidebarData = {
             ariaLabel: 'Interfaces',
             link: '/network/interfaces',
             subItems: [
-                { label: 'Vlans', link: '/network/vlans' }
+                { label: 'Vlans', link: '/network/interfaces/vlans', }
             ]
         },
         { label: 'Routing', ariaLabel: 'Routing', link: '/network/routing' },

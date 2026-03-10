@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useVlans, VlanInterface } from '@/hooks/useVlans';
+// 1. IMPORTAMOS EL HOOK DE INTERFACES FÍSICAS
+import { useInterfaces } from '@/hooks/useInterfaces';
 import DhcpModal from '@/components/DhcpModal';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -14,11 +16,13 @@ import { Edit2, Shield, ShieldAlert, Layers, Save, RefreshCw, Activity, X, Serve
 export default function VlansPage() {
     const { vlans, fetchVlans, saveVlan, deleteVlan, isLoading, error } = useVlans();
 
+    // 2. EXTRAEMOS LAS INTERFACES FÍSICAS PARA EL DROPDOWN
+    const { interfaces: physicalInterfaces, fetchInterfaces: fetchPhysicalInterfaces } = useInterfaces();
+
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [selectedVlan, setSelectedVlan] = useState<VlanInterface | null>(null);
 
-    // Estados del formulario
     const [formId, setFormId] = useState<number | ''>('');
     const [formParent, setFormParent] = useState('');
     const [formIp, setFormIp] = useState('');
@@ -30,7 +34,9 @@ export default function VlansPage() {
 
     useEffect(() => {
         fetchVlans();
-    }, [fetchVlans]);
+        // 3. CARGAMOS LAS INTERFACES FÍSICAS AL ENTRAR A LA PÁGINA
+        fetchPhysicalInterfaces();
+    }, [fetchVlans, fetchPhysicalInterfaces]);
 
     const handleAddClick = () => {
         setIsEditMode(false);
@@ -65,9 +71,13 @@ export default function VlansPage() {
     const handleSave = async () => {
         if (!formId || !formParent) return alert("VLAN ID and Parent Interface are required.");
 
-        // El nombre de la VLAN generalmente se arma combinando Padre.ID (ej. enp0s9.10)
-        const vlanName = `${formParent}.${formId}`;
+        // Validación extra de seguridad (Capa 3) por si el usuario burla el frontend
+        const parentInterface = physicalInterfaces.find(iface => iface.name === formParent);
+        if (parentInterface && parentInterface.ip) {
+            return alert(`Cannot use ${formParent} as parent. It has an IP assigned (Layer 3 active). Remove its IP first.`);
+        }
 
+        const vlanName = `${formParent}.${formId}`;
         const payload: Partial<VlanInterface> = {
             id: Number(formId),
             name: vlanName,
@@ -162,7 +172,6 @@ export default function VlansPage() {
                 </Table>
             </div>
 
-            {/* PANEL LATERAL DE EDICIÓN / CREACIÓN */}
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                 <SheetContent className="bg-[#09090b] border-l border-zinc-800 text-zinc-100 sm:max-w-md w-full p-0 flex flex-col h-full">
                     <div className="p-6 border-b border-zinc-800 bg-zinc-950/50">
@@ -180,11 +189,35 @@ export default function VlansPage() {
                                 <Label className="text-zinc-500 font-mono text-xs uppercase">VLAN ID (Tag)</Label>
                                 <Input type="number" value={formId} onChange={(e) => setFormId(e.target.value ? Number(e.target.value) : '')} disabled={isEditMode} className="bg-zinc-900/50 border-zinc-800 text-emerald-400 font-mono focus-visible:ring-emerald-500/50 h-11" placeholder="e.g. 10" />
                             </div>
+
+                            {/* 4. EL SELECTOR MÁGICO DE INTERFAZ PADRE */}
                             <div className="space-y-3">
                                 <Label className="text-zinc-500 font-mono text-xs uppercase">Parent Interface</Label>
-                                <Input value={formParent} onChange={(e) => setFormParent(e.target.value)} disabled={isEditMode} className="bg-zinc-900/50 border-zinc-800 text-emerald-400 font-mono focus-visible:ring-emerald-500/50 h-11" placeholder="e.g. enp0s9" />
+                                <div className="relative">
+                                    <select
+                                        value={formParent}
+                                        onChange={(e) => setFormParent(e.target.value)}
+                                        disabled={isEditMode}
+                                        className="w-full h-11 appearance-none rounded-md border border-zinc-800 bg-zinc-900/50 px-3 py-2 text-sm text-zinc-100 font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500/50 disabled:opacity-50"
+                                    >
+                                        <option value="" disabled>Select parent...</option>
+                                        {physicalInterfaces.map(iface => {
+                                            const hasIp = !!iface.ip; // Verificamos si tiene IP
+                                            return (
+                                                <option key={iface.name} value={iface.name} disabled={hasIp}>
+                                                    {iface.name} {hasIp ? '(L3 Active - Invalid)' : '(L2 Ready)'}
+                                                </option>
+                                            );
+                                        })}
+                                    </select>
+                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
+                                        <svg className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+
+                        {/* ... (El resto del formulario se mantiene idéntico) ... */}
 
                         <div className="space-y-3">
                             <Label className="text-zinc-500 font-mono text-xs uppercase">Administrative Status</Label>
@@ -245,12 +278,7 @@ export default function VlansPage() {
                 </SheetContent>
             </Sheet>
 
-            {/* Inyectamos nuestro componente reutilizable de DHCP */}
-            <DhcpModal
-                isOpen={isDhcpModalOpen}
-                onClose={() => setIsDhcpModalOpen(false)}
-                interfaceName={`${formParent}.${formId}`}
-            />
+            <DhcpModal isOpen={isDhcpModalOpen} onClose={() => setIsDhcpModalOpen(false)} interfaceName={`${formParent}.${formId}`} />
         </div>
     );
 }
