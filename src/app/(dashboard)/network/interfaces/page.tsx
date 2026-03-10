@@ -84,7 +84,7 @@ export default function InterfacesPage() {
                         <TableCell className="font-mono text-sm text-zinc-300">{iface.ip || <span className="text-zinc-600 italic text-xs">Unassigned</span>}</TableCell>
                         <TableCell><ZoneBadge zone={iface.zone} /></TableCell>
                         <TableCell><div className="flex gap-1">{iface.management?.map(mgt => (<span key={mgt} className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 font-mono text-[10px] uppercase tracking-wider">{mgt}</span>))}</div></TableCell>
-                        <TableCell className="text-right"><Button variant="ghost" size="icon" onClick={() => handleEditClick(iface)} className="h-8 w-8 text-zinc-400 hover:text-emerald-400 opacity-50 group-hover:opacity-100 transition-all"><Edit2 className="w-4 h-4" /></Button></TableCell>
+                        <TableCell className="text-right"><Button variant="ghost" size="icon" onClick={() => handleEditClick(iface)} className="h-8 w-8 text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/10"><Edit2 className="w-4 h-4" /></Button></TableCell>
                     </TableRow>
                 ))}
             </FirewallTable>
