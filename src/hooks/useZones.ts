@@ -3,9 +3,9 @@ import { useState, useCallback } from 'react';
 
 export interface Zone {
     name: string;
-    networks: string[];
-    interfaces: string[];
     type: string;
+    interfaces: string[];
+    networks: string[];
 }
 
 export function useZones() {
@@ -14,10 +14,7 @@ export function useZones() {
 
     const getHeaders = () => {
         const token = localStorage.getItem('sentinel_token');
-        return {
-            'Content-Type': 'application/json',
-            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        };
+        return { 'Content-Type': 'application/json', ...(token ? { 'Authorization': `Bearer ${token}` } : {}) };
     };
 
     const fetchZones = useCallback(async () => {
@@ -34,5 +31,29 @@ export function useZones() {
         }
     }, []);
 
-    return { zones, fetchZones, isLoadingZones };
+    const saveZone = async (zoneName: string, payload: Partial<Zone>) => {
+        setIsLoadingZones(true);
+        try {
+            const resBegin = await fetch('/api/config/begin', { method: 'POST', headers: getHeaders() });
+            if (!resBegin.ok) throw new Error(await resBegin.text());
+
+            const resUpdate = await fetch(`/api/zones/${zoneName}`, {
+                method: 'PUT', headers: getHeaders(), body: JSON.stringify(payload)
+            });
+            if (!resUpdate.ok) throw new Error(await resUpdate.text());
+
+            const resCommit = await fetch('/api/config/commit', { method: 'POST', headers: getHeaders() });
+            if (!resCommit.ok) throw new Error(await resCommit.text());
+
+            await fetchZones();
+            return true;
+        } catch (err: any) {
+            alert(err.message || 'Error saving zone');
+            return false;
+        } finally {
+            setIsLoadingZones(false);
+        }
+    };
+
+    return { zones, fetchZones, saveZone, isLoadingZones };
 }
