@@ -225,12 +225,15 @@ export function ZoneEditDrawer({ isOpen, onClose, zoneName }: ZoneEditDrawerProp
             </Sheet>
 
             {/* TERCER NIVEL DE CASCADA: Edición de la Interfaz seleccionada */}
-            <InterfaceEditDrawer
-                isOpen={isInterfaceDrawerOpen}
-                onClose={() => setIsInterfaceDrawerOpen(false)}
-                iface={selectedInterfaceObj}
-                onSuccess={fetchInterfaces} // Refresca las interfaces para actualizar el filtro L2/L3 en vivo
-            />
+            {/* EL FIX: Agregamos "isInterfaceDrawerOpen &&" al principio */}
+            {isInterfaceDrawerOpen && (
+                <InterfaceEditDrawer
+                    isOpen={isInterfaceDrawerOpen}
+                    onClose={() => setIsInterfaceDrawerOpen(false)}
+                    iface={selectedInterfaceObj}
+                    onSuccess={fetchInterfaces}
+                />
+            )}
         </>
     );
 }

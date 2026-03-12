@@ -111,8 +111,23 @@ export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess }: Inter
                 </SheetContent>
             </Sheet>
 
-            <ZoneEditDrawer isOpen={isZoneDrawerOpen} onClose={() => setIsZoneDrawerOpen(false)} zoneName={formZone} />
-            <DhcpModal isOpen={isDhcpModalOpen} onClose={() => setIsDhcpModalOpen(false)} interfaceName={iface?.name || ''} />
+            {/* EL FIX: Agregamos "isZoneDrawerOpen &&" al principio */}
+            {isZoneDrawerOpen && (
+                <ZoneEditDrawer
+                    isOpen={isZoneDrawerOpen}
+                    onClose={() => setIsZoneDrawerOpen(false)}
+                    zoneName={formZone}
+                />
+            )}
+
+            {/* Ya que estamos, protejamos el DHCP también */}
+            {isDhcpModalOpen && (
+                <DhcpModal
+                    isOpen={isDhcpModalOpen}
+                    onClose={() => setIsDhcpModalOpen(false)}
+                    interfaceName={iface?.name || ''}
+                />
+            )}
         </>
     );
 }
