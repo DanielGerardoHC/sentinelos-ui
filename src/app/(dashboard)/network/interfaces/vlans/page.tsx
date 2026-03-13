@@ -6,36 +6,50 @@ import { useVlans, VlanInterface } from '@/hooks/useVlans';
 import { PageHeader } from '@/components/firewall/PageHeader';
 import { StatusBadge, ZoneBadge } from '@/components/firewall/FirewallBadges';
 import { FirewallTable } from '@/components/firewall/FirewallTable';
-import { VlanEditDrawer } from '@/components/firewall/VlanDrawer'; // <-- NUESTRO NUEVO COMPONENTE
+import { VlanEditDrawer } from '@/components/firewall/VlanDrawer';
+import { AlertModal } from '@/components/firewall/AlertModal';
 
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit2, ShieldAlert, Trash2, Activity } from "lucide-react";
+import { Edit2, Trash2, Activity } from "lucide-react";
 
 export default function VlansPage() {
-    const { vlans, fetchVlans, deleteVlan, isLoading, error } = useVlans();
+    const { vlans, fetchVlans, deleteVlan, isLoading, error: fetchError } = useVlans();
 
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedVlan, setSelectedVlan] = useState<VlanInterface | null>(null);
+
+    // Estados para alertas
+    const [backendError, setBackendError] = useState('');
+    const [deleteConfirm, setDeleteConfirm] = useState<{isOpen: boolean, vlanName: string}>({
+        isOpen: false, vlanName: ''
+    });
 
     useEffect(() => {
         fetchVlans();
     }, [fetchVlans]);
 
     const handleAddClick = () => {
-        setSelectedVlan(null); // Null significa modo "Crear"
+        setBackendError('');
+        setSelectedVlan(null);
         setIsDrawerOpen(true);
     };
 
     const handleEditClick = (vlan: VlanInterface) => {
-        setSelectedVlan(vlan); // Le pasamos los datos para modo "Editar"
+        setBackendError('');
+        setSelectedVlan(vlan);
         setIsDrawerOpen(true);
     };
 
-    const handleDelete = async (vlanName: string) => {
-        if(confirm(`Are you sure you want to delete VLAN ${vlanName}?`)) {
-            await deleteVlan(vlanName);
-        }
+    const initiateDelete = (vlanName: string) => {
+        setBackendError('');
+        setDeleteConfirm({ isOpen: true, vlanName });
+    };
+
+    const confirmDelete = async () => {
+        const success = await deleteVlan(deleteConfirm.vlanName);
+        if (!success) setBackendError("Failed to delete VLAN from backend.");
+        setDeleteConfirm({ isOpen: false, vlanName: '' });
     };
 
     const tableColumns = [
@@ -43,6 +57,8 @@ export default function VlansPage() {
         { label: "State", className: "w-[120px]" }, { label: "IP / Netmask" },
         { label: "Zone" }, { label: "Management" }, { label: "Actions", className: "text-right" }
     ];
+
+    const displayError = backendError || fetchError;
 
     return (
         <div className="space-y-6 relative overflow-hidden">
@@ -55,11 +71,24 @@ export default function VlansPage() {
                 addText="+ Add VLAN"
             />
 
-            {error && (
-                <div className="p-4 bg-red-950/50 border border-red-500/50 text-red-400 font-mono flex items-center gap-3 rounded-lg">
-                    <ShieldAlert className="w-5 h-5" /> {error}
-                </div>
-            )}
+            <AlertModal
+                isOpen={!!displayError}
+                type="error"
+                title="Configuration Error"
+                message={displayError}
+                onCancel={() => setBackendError('')}
+            />
+
+            <AlertModal
+                isOpen={deleteConfirm.isOpen}
+                type="confirm"
+                title="Delete VLAN?"
+                message={`Are you sure you want to delete VLAN ${deleteConfirm.vlanName}? This will instantly remove the interface and drop all active connections.`}
+                confirmText="YES, DELETE"
+                isLoading={isLoading}
+                onConfirm={confirmDelete}
+                onCancel={() => setDeleteConfirm({ isOpen: false, vlanName: '' })}
+            />
 
             <FirewallTable columns={tableColumns} isEmpty={vlans.length === 0} isLoading={isLoading} emptyMessage="No VLANs found.">
                 {vlans.map((vlan) => (
@@ -90,7 +119,7 @@ export default function VlansPage() {
                                     <Edit2 className="w-4 h-4" />
                                 </Button>
                                 <Button
-                                    variant="outline" size="icon" onClick={() => handleDelete(vlan.name)}
+                                    variant="outline" size="icon" onClick={() => initiateDelete(vlan.name)}
                                     className="h-8 w-8 bg-transparent border-transparent text-zinc-400 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/50 transition-colors"
                                 >
                                     <Trash2 className="w-4 h-4" />
@@ -101,13 +130,16 @@ export default function VlansPage() {
                 ))}
             </FirewallTable>
 
-            {/* SE MANDA A LLAMAR EL CAJÓN DE VLANS Y ÉL SE ENCARGA DEL RESTO */}
             {isDrawerOpen && (
                 <VlanEditDrawer
                     isOpen={isDrawerOpen}
                     onClose={() => setIsDrawerOpen(false)}
                     vlan={selectedVlan}
-                    onSuccess={fetchVlans} // Refresca la tabla cuando se guarda algo
+                    onSuccess={fetchVlans}
+                    onError={(msg) => {
+                        setIsDrawerOpen(false); // Cerramos el cajón para que la alerta gigante se luzca
+                        setBackendError(msg);
+                    }}
                 />
             )}
         </div>

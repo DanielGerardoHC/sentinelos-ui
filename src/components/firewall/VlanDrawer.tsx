@@ -15,20 +15,22 @@ import { ManagementSelector } from './ManagementSelector';
 import { ZoneEditDrawer } from './ZoneEditDrawer';
 import { InterfaceEditDrawer } from './InterfaceEditDrawer';
 import { DhcpDrawer } from './DhcpDrawer';
+import { AlertModal } from './AlertModal';
 
 interface VlanEditDrawerProps {
     isOpen: boolean;
     onClose: () => void;
-    vlan: VlanInterface | null; // Si es null, estamos creando una nueva
+    vlan: VlanInterface | null;
     onSuccess?: () => void;
+    onError?: (msg: string) => void; // Para pasar el error a la página
 }
 
-export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess }: VlanEditDrawerProps) {
-    const { saveVlan, isLoading } = useVlans();
+export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess, onError }: VlanEditDrawerProps) {
+    const { saveVlan, isLoading, error } = useVlans();
     const { interfaces: physicalInterfaces, fetchInterfaces: fetchPhysicalInterfaces } = useInterfaces();
     const { zones, fetchZones } = useZones();
 
-    const isEditMode = !!vlan; // Booleano: ¿hay datos o es nuevo?
+    const isEditMode = !!vlan;
 
     const [formId, setFormId] = useState<number | ''>('');
     const [formParent, setFormParent] = useState('');
@@ -42,7 +44,9 @@ export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess }: VlanEditDra
     const [isParentSheetOpen, setIsParentSheetOpen] = useState(false);
     const [isDhcpModalOpen, setIsDhcpModalOpen] = useState(false);
 
-    // Cargar dependencias y rellenar formulario al abrir el Drawer
+    // Estado de alerta local (validaciones del frontend)
+    const [localAlert, setLocalAlert] = useState<{isOpen: boolean, msg: string}>({isOpen: false, msg: ''});
+
     useEffect(() => {
         if (isOpen) {
             fetchPhysicalInterfaces();
@@ -66,13 +70,23 @@ export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess }: VlanEditDra
         }
     }, [isOpen, vlan, fetchPhysicalInterfaces, fetchZones]);
 
-    const handleSave = async () => {
-        if (!formId || !formParent) return alert("VLAN ID and Parent Interface are required.");
+    // Comunicar el error del backend a la página padre
+    useEffect(() => {
+        if (error && onError) {
+            onError(error);
+        }
+    }, [error, onError]);
 
-        // Validación L3: El padre no puede tener IP
+    const handleSave = async () => {
+        if (!formId || !formParent) {
+            setLocalAlert({ isOpen: true, msg: "VLAN ID and Parent Interface are required." });
+            return;
+        }
+
         const parentInterface = physicalInterfaces.find(iface => iface.name === formParent);
         if (parentInterface && parentInterface.ip) {
-            return alert(`Cannot use ${formParent} as parent. It has an IP assigned (Layer 3 active). Remove its IP first.`);
+            setLocalAlert({ isOpen: true, msg: `Cannot use ${formParent} as parent. It has an IP assigned (Layer 3 active). Remove its IP first.` });
+            return;
         }
 
         const vlanName = `${formParent}.${formId}`;
@@ -81,7 +95,6 @@ export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess }: VlanEditDra
             zone: formZone, state: formState, management: formManagement
         };
 
-        // Pasamos el vlanName como ajustamos en el Hook anterior
         const success = await saveVlan(isEditMode ? 'PUT' : 'POST', vlanName, payload);
         if (success) {
             if (onSuccess) onSuccess();
@@ -93,7 +106,6 @@ export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess }: VlanEditDra
         setFormManagement(prev => prev.includes(service) ? prev.filter(s => s !== service) : [...prev, service]);
     };
 
-    // Preparamos opciones para los dropdowns
     const parentOptions = physicalInterfaces.map(iface => ({
         label: `${iface.name} ${iface.ip ? '(L3 Active - Invalid)' : '(L2 Ready)'}`,
         value: iface.name,
@@ -106,14 +118,17 @@ export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess }: VlanEditDra
     }));
 
     const selectedParentInterfaceObj = physicalInterfaces.find(i => i.name === formParent) || null;
-    const slideOffset = isParentSheetOpen || isZoneSheetOpen ? '200px' : '0px';
+
+    // Lógica para el desenfoque
+    const slideOffset = isParentSheetOpen || isZoneSheetOpen || isDhcpModalOpen ? '150px' : '0px';
+    const isChildOpen = isParentSheetOpen || isZoneSheetOpen || isDhcpModalOpen || localAlert.isOpen;
 
     return (
         <>
             <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
                 <SheetContent
                     style={{ right: slideOffset }}
-                    className="bg-[#09090b] border-l border-zinc-800 text-zinc-100 w-full sm:w-[650px] sm:!max-w-[650px] p-0 flex flex-col h-full transition-all duration-300 ease-in-out z-[50]"
+                    className={`bg-[#09090b] border-l border-zinc-800 text-zinc-100 w-full sm:w-[650px] sm:!max-w-[650px] p-0 flex flex-col h-full transition-all duration-300 ease-in-out z-[50] ${isChildOpen ? 'blur-[2px] brightness-50 pointer-events-none' : ''}`}
                 >
                     <div className="p-6 border-b border-zinc-800 bg-zinc-950/50">
                         <SheetHeader>
@@ -175,7 +190,14 @@ export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess }: VlanEditDra
                 </SheetContent>
             </Sheet>
 
-            {/* LOS PANELES EN CASCADA (Protegidos con renderizado condicional &&) */}
+            <AlertModal
+                isOpen={localAlert.isOpen}
+                type="error"
+                title="Validation Error"
+                message={localAlert.msg}
+                onCancel={() => setLocalAlert({ isOpen: false, msg: '' })}
+            />
+
             {isZoneSheetOpen && (
                 <ZoneEditDrawer isOpen={isZoneSheetOpen} onClose={() => setIsZoneSheetOpen(false)} zoneName={formZone} />
             )}
