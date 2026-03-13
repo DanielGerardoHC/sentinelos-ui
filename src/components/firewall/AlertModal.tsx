@@ -29,7 +29,6 @@ export function AlertModal({
 
     if (!isOpen) return null;
 
-    // Configuraciones visuales dependiendo del tipo de alerta
     const config = {
         success: {
             icon: <CheckCircle2 className="w-10 h-10 text-emerald-500" />,
@@ -47,7 +46,7 @@ export function AlertModal({
             icon: <AlertTriangle className="w-10 h-10 text-amber-500" />,
             borderColor: "border-amber-500/50",
             bgIcon: "bg-amber-500/10",
-            confirmBtn: "bg-emerald-600 hover:bg-emerald-500 text-white", // Confirmar suele ser la acción deseada
+            confirmBtn: "bg-emerald-600 hover:bg-emerald-500 text-white",
         }
     };
 
@@ -58,12 +57,11 @@ export function AlertModal({
             <div className={`bg-[#09090b] border ${currentConfig.borderColor} rounded-xl w-full max-w-sm shadow-2xl shadow-black overflow-hidden flex flex-col scale-in-95 animate-in duration-200`}>
 
                 <div className="p-6 flex flex-col items-center text-center space-y-4 pt-8">
-                    {/* Icono Redondeado */}
+
                     <div className={`p-4 rounded-full ${currentConfig.bgIcon}`}>
                         {currentConfig.icon}
                     </div>
 
-                    {/* Textos */}
                     <div className="space-y-2">
                         <h3 className="text-xl font-bold font-mono text-zinc-100 tracking-tight">
                             {title}
@@ -74,10 +72,8 @@ export function AlertModal({
                     </div>
                 </div>
 
-                {/* Botones */}
                 <div className="p-4 border-t border-zinc-800/50 bg-zinc-950 flex justify-center gap-3">
 
-                    {/* En tipo 'error', el botón de cancelar suele actuar como "Cerrar" y no mostramos confirmar */}
                     {type === 'error' ? (
                         <Button
                             onClick={onCancel}
@@ -87,7 +83,6 @@ export function AlertModal({
                         </Button>
                     ) : (
                         <>
-                            {/* Mostrar botón de Cancelar solo en confirmaciones */}
                             {type === 'confirm' && (
                                 <Button
                                     variant="outline"
@@ -99,7 +94,6 @@ export function AlertModal({
                                 </Button>
                             )}
 
-                            {/* Botón de Confirmar / OK */}
                             <Button
                                 onClick={onConfirm}
                                 disabled={isLoading}

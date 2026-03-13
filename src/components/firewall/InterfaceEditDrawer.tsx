@@ -19,7 +19,7 @@ interface InterfaceEditDrawerProps {
     onClose: () => void;
     iface: NetworkInterface | null;
     onSuccess?: () => void;
-    onError?: (msg: string) => void; // <--- Prop para enviar error a la página
+    onError?: (msg: string) => void;
 }
 
 export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess, onError }: InterfaceEditDrawerProps) {
@@ -45,7 +45,6 @@ export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess, onError
         }
     }, [iface]);
 
-    // Comunicar error del backend
     useEffect(() => {
         if (error && onError) onError(error);
     }, [error, onError]);

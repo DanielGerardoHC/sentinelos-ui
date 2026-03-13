@@ -38,27 +38,36 @@ export function useInterfaces() {
     const updateInterface = async (interfaceName: string, changes: Partial<NetworkInterface>) => {
         setIsLoading(true);
         setError('');
-        let sessionStarted = false; // Candado Anti-Deadlock
+
+        let lockAcquired = false;
+        let stepError = '';
 
         try {
-            // 1. BEGIN
             const resBegin = await fetch('/api/config/begin', { method: 'POST', headers: getHeaders() });
             if (!resBegin.ok) throw new Error(await resBegin.text());
-            sessionStarted = true;
+            lockAcquired = true;
 
-            // 2. CANDIDATE UPDATE
             const resUpdate = await fetch(`/api/interfaces/${interfaceName}`, {
                 method: 'PUT',
                 headers: getHeaders(),
                 body: JSON.stringify(changes),
             });
-            if (!resUpdate.ok) throw new Error(await resUpdate.text());
+            if (!resUpdate.ok) {
+                stepError = await resUpdate.text();
+            }
 
-            // 3. COMMIT
             const resCommit = await fetch('/api/config/commit', { method: 'POST', headers: getHeaders() });
-            sessionStarted = false; // Liberamos la sesión
+            lockAcquired = false;
 
-            if (!resCommit.ok) throw new Error(`Validation Error: ${await resCommit.text()}`);
+            if (!resCommit.ok) {
+                const commitMsg = await resCommit.text();
+                throw new Error(`Validation Error: ${commitMsg}`);
+            }
+
+            if (stepError) {
+                throw new Error(stepError);
+            }
+
 
             await fetchInterfaces();
             return true;
@@ -66,10 +75,9 @@ export function useInterfaces() {
         } catch (err: any) {
             setError(err.message || 'Error en la transacción');
 
-            // CATCH DE SEGURIDAD
-            if (sessionStarted) {
+            if (lockAcquired) {
                 try { await fetch('/api/config/commit', { method: 'POST', headers: getHeaders() }); }
-                catch (e) { console.error("Cleanup commit failed:", e); }
+                catch (e) { console.error("Failsafe unlock failed", e); }
             }
             return false;
         } finally {
