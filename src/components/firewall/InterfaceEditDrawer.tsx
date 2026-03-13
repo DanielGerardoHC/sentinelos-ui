@@ -66,7 +66,7 @@ export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess }: Inter
             <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
                 <SheetContent
                     // Si abrimos la zona desde aquí, empujamos este panel 500px
-                    style={{ right: isZoneDrawerOpen ? '150px' : '0px' }}
+                    style={{ right: isZoneDrawerOpen ? '200px' : '0px' }}
                     // Lo hicimos más ancho: max-w-[500px]
                     className="bg-[#09090b] border-l border-zinc-800 text-zinc-100 sm:max-w-[448px] w-full p-0 flex flex-col h-full transition-all duration-300 shadow-2xl shadow-black z-[60]"
                 >

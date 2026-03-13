@@ -93,7 +93,7 @@ export function ZoneEditDrawer({ isOpen, onClose, zoneName }: ZoneEditDrawerProp
         <>
             <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
                 <SheetContent
-                    style={{ right: isInterfaceDrawerOpen ? '150px' : '0px' }} // Empuja este panel si abrimos la interfaz
+                    style={{ right: isInterfaceDrawerOpen ? '200px' : '0px' }} // Empuja este panel si abrimos la interfaz
                     className="bg-[#09090b] border-l border-zinc-800 text-zinc-100 sm:max-w-md w-full p-0 flex flex-col h-full shadow-2xl shadow-black z-[60] transition-all duration-300"
                 >
 
