@@ -27,7 +27,6 @@ export function DhcpDrawer({ isOpen, onClose, interfaceName, onSuccess }: DhcpDr
     const [dns2, setDns2] = useState('1.1.1.1');
     const [leaseTime, setLeaseTime] = useState(1440);
 
-    // Buscar la configuración cuando el cajón se abre
     useEffect(() => {
         if (isOpen && interfaceName) {
             fetchDhcpPools().then(() => {
@@ -53,10 +52,9 @@ export function DhcpDrawer({ isOpen, onClose, interfaceName, onSuccess }: DhcpDr
                 }
             });
         }
-    }, [isOpen, interfaceName]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [isOpen, interfaceName]);
 
     const handleSave = async () => {
-        // Si lo deshabilitaron y existía, lo borramos
         if (!dhcpEnabled) {
             if (existsInApi) {
                 const success = await deleteDhcp(interfaceName);
@@ -65,12 +63,11 @@ export function DhcpDrawer({ isOpen, onClose, interfaceName, onSuccess }: DhcpDr
                     onClose();
                 }
             } else {
-                onClose(); // No existía y no lo habilitaron, solo cerramos
+                onClose();
             }
             return;
         }
 
-        // Si lo habilitaron, guardamos o actualizamos
         const payload = {
             interface: interfaceName,
             start_ip: startIp,
@@ -89,8 +86,6 @@ export function DhcpDrawer({ isOpen, onClose, interfaceName, onSuccess }: DhcpDr
         }
     };
 
-    // Este es el último cajón de la cadena, no empuja a nadie más a la izquierda,
-    // pero se desliza normalmente desde la derecha y tiene un z-index altísimo (z-[80]).
     return (
         <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <SheetContent
@@ -116,7 +111,6 @@ export function DhcpDrawer({ isOpen, onClose, interfaceName, onSuccess }: DhcpDr
 
                 <div className="p-6 space-y-8 flex-1 overflow-y-auto">
 
-                    {/* TOGGLE PRINCIPAL */}
                     <label className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${dhcpEnabled ? 'border-emerald-500/50 bg-emerald-500/10' : 'border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800'}`}>
                         <input
                             type="checkbox"
@@ -129,7 +123,6 @@ export function DhcpDrawer({ isOpen, onClose, interfaceName, onSuccess }: DhcpDr
                         </span>
                     </label>
 
-                    {/* FORMULARIO (Se opaca si está apagado) */}
                     <div className={`space-y-6 transition-opacity duration-300 ${dhcpEnabled ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-3">

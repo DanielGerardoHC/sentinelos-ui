@@ -35,7 +35,6 @@ export function RouteEditDrawer({ isOpen, onClose, routeData, onSuccess, onError
 
     const [isInterfaceDrawerOpen, setIsInterfaceDrawerOpen] = useState(false);
 
-    // Estado para alerta de validación local (ej. no ingresó destino)
     const [localAlert, setLocalAlert] = useState<{isOpen: boolean, msg: string}>({isOpen: false, msg: ''});
 
     useEffect(() => {
@@ -57,7 +56,6 @@ export function RouteEditDrawer({ isOpen, onClose, routeData, onSuccess, onError
         }
     }, [isOpen, routeData, fetchInterfaces]);
 
-    // Comunicar el error del backend a la página padre
     useEffect(() => {
         if (error && onError) {
             onError(error);
@@ -146,7 +144,6 @@ export function RouteEditDrawer({ isOpen, onClose, routeData, onSuccess, onError
                 </SheetContent>
             </Sheet>
 
-            {/* ALERTA DE ERROR LOCAL */}
             <AlertModal
                 isOpen={localAlert.isOpen}
                 type="error"

@@ -22,7 +22,7 @@ interface VlanEditDrawerProps {
     onClose: () => void;
     vlan: VlanInterface | null;
     onSuccess?: () => void;
-    onError?: (msg: string) => void; // Para pasar el error a la página
+    onError?: (msg: string) => void;
 }
 
 export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess, onError }: VlanEditDrawerProps) {
@@ -39,12 +39,10 @@ export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess, onError }: Vl
     const [formState, setFormState] = useState('up');
     const [formManagement, setFormManagement] = useState<string[]>([]);
 
-    // Estados de los sub-paneles
     const [isZoneSheetOpen, setIsZoneSheetOpen] = useState(false);
     const [isParentSheetOpen, setIsParentSheetOpen] = useState(false);
     const [isDhcpModalOpen, setIsDhcpModalOpen] = useState(false);
 
-    // Estado de alerta local (validaciones del frontend)
     const [localAlert, setLocalAlert] = useState<{isOpen: boolean, msg: string}>({isOpen: false, msg: ''});
 
     useEffect(() => {
@@ -70,7 +68,6 @@ export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess, onError }: Vl
         }
     }, [isOpen, vlan, fetchPhysicalInterfaces, fetchZones]);
 
-    // Comunicar el error del backend a la página padre
     useEffect(() => {
         if (error && onError) {
             onError(error);
@@ -119,7 +116,6 @@ export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess, onError }: Vl
 
     const selectedParentInterfaceObj = physicalInterfaces.find(i => i.name === formParent) || null;
 
-    // Lógica para el desenfoque
     const slideOffset = isParentSheetOpen || isZoneSheetOpen || isDhcpModalOpen ? '150px' : '0px';
     const isChildOpen = isParentSheetOpen || isZoneSheetOpen || isDhcpModalOpen || localAlert.isOpen;
 

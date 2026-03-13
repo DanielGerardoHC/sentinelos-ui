@@ -73,7 +73,6 @@ export function ZoneEditDrawer({ isOpen, onClose, zoneName }: ZoneEditDrawerProp
         setIsInterfaceDrawerOpen(true);
     };
 
-    // --- LÓGICA DE EFECTOS VISUALES ---
     const slideOffset = isInterfaceDrawerOpen ? '150px' : '0px';
     const isChildOpen = isInterfaceDrawerOpen;
 
@@ -82,7 +81,6 @@ export function ZoneEditDrawer({ isOpen, onClose, zoneName }: ZoneEditDrawerProp
             <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
                 <SheetContent
                     style={{ right: slideOffset }}
-                    // FIX: Ancho 650px y efecto blur/oscuro dinámico
                     className={`bg-[#09090b] border-l border-zinc-800 text-zinc-100 w-full sm:w-[650px] sm:!max-w-[650px] p-0 flex flex-col h-full shadow-2xl shadow-black z-[70] transition-all duration-300 ${isChildOpen ? 'blur-[2px] brightness-50 pointer-events-none' : ''}`}
                 >
 
