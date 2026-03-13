@@ -121,7 +121,7 @@ export default function VlansPage() {
     const selectedParentInterfaceObj = physicalInterfaces.find(i => i.name === formParent) || null;
 
     // El drawer del Padre lo hicimos de 500px, así que empujamos 500px a la izquierda
-    const slideOffset = isParentSheetOpen ? '500px' : (isZoneSheetOpen ? '448px' : '0px');
+    const slideOffset = isParentSheetOpen ? '150px' : (isZoneSheetOpen ? '150px' : '0px');
 
     return (
         <div className="space-y-6 relative overflow-hidden">
