@@ -92,7 +92,7 @@ export default function VlansPage() {
             zone: formZone, state: formState, management: formManagement
         };
 
-        const success = await saveVlan(isEditMode ? 'PUT' : 'POST', payload);
+        const success = await saveVlan(isEditMode ? 'PUT' : 'POST', vlanName, payload);
         if (success) setIsSheetOpen(false);
     };
 

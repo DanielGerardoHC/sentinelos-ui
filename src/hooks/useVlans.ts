@@ -38,14 +38,18 @@ export function useVlans() {
         }
     }, []);
 
-    const saveVlan = async (method: 'POST' | 'PUT', payload: Partial<VlanInterface>) => {
+    // FIX: Agregamos vlanName como parámetro para poder armar la URL del PUT
+    const saveVlan = async (method: 'POST' | 'PUT', vlanName: string, payload: Partial<VlanInterface>) => {
         setIsLoading(true);
         setError('');
         try {
             const resBegin = await fetch('/api/config/begin', { method: 'POST', headers: getHeaders() });
             if (!resBegin.ok) throw new Error(await resBegin.text());
 
-            const resUpdate = await fetch('/api/vlans', {
+            // FIX: Si es PUT, agregamos el nombre a la URL como lo espera Go
+            const url = method === 'PUT' ? `/api/vlans/${vlanName}` : '/api/vlans';
+
+            const resUpdate = await fetch(url, {
                 method: method,
                 headers: getHeaders(),
                 body: JSON.stringify(payload),
@@ -72,7 +76,6 @@ export function useVlans() {
             const resBegin = await fetch('/api/config/begin', { method: 'POST', headers: getHeaders() });
             if (!resBegin.ok) throw new Error(await resBegin.text());
 
-            // Cuando programes el DELETE en Go, asegúrate de que reciba el nombre por URL o body
             const resDelete = await fetch(`/api/vlans/${vlanName}`, { method: 'DELETE', headers: getHeaders() });
             if (!resDelete.ok) throw new Error(await resDelete.text());
 
