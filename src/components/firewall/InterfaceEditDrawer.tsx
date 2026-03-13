@@ -18,7 +18,7 @@ interface InterfaceEditDrawerProps {
     isOpen: boolean;
     onClose: () => void;
     iface: NetworkInterface | null;
-    onSuccess?: () => void; // Para recargar los datos en la tabla principal
+    onSuccess?: () => void;
 }
 
 export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess }: InterfaceEditDrawerProps) {
@@ -30,7 +30,6 @@ export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess }: Inter
     const [formState, setFormState] = useState('up');
     const [formManagement, setFormManagement] = useState<string[]>([]);
 
-    // ¡Este drawer incluso tiene sus propias cascadas!
     const [isZoneDrawerOpen, setIsZoneDrawerOpen] = useState(false);
     const [isDhcpModalOpen, setIsDhcpModalOpen] = useState(false);
 
@@ -61,20 +60,23 @@ export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess }: Inter
 
     const zoneOptions = zones.map(z => ({ label: `${z.name.toUpperCase()} (${z.type})`, value: z.name }));
 
+    // --- LÓGICA DE EFECTOS VISUALES ---
+    const slideOffset = isZoneDrawerOpen ? '150px' : '0px';
+    const isChildOpen = isZoneDrawerOpen || isDhcpModalOpen;
+
     return (
         <>
             <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
                 <SheetContent
-                    // Si abrimos la zona desde aquí, empujamos este panel 500px
-                    style={{ right: isZoneDrawerOpen ? '200px' : '0px' }}
-                    // Lo hicimos más ancho: max-w-[500px]
-                    className="bg-[#09090b] border-l border-zinc-800 text-zinc-100 sm:max-w-[448px] w-full p-0 flex flex-col h-full transition-all duration-300 shadow-2xl shadow-black z-[60]"
+                    style={{ right: slideOffset }}
+                    // FIX: Ancho 650px y efecto de difuminado oscuro si hay un panel hijo abierto
+                    className={`bg-[#09090b] border-l border-zinc-800 text-zinc-100 w-full sm:w-[650px] sm:!max-w-[650px] p-0 flex flex-col h-full transition-all duration-300 shadow-2xl shadow-black z-[60] ${isChildOpen ? 'blur-[2px] brightness-50 pointer-events-none' : ''}`}
                 >
                     <div className="p-6 border-b border-zinc-800 bg-zinc-950/50">
                         <SheetHeader>
                             <SheetTitle className="text-zinc-100 font-mono text-2xl flex items-center gap-3">
                                 <Activity className="w-5 h-5 text-emerald-500" />
-                                Edit Parent: {iface?.name}
+                                Edit Interface: {iface?.name}
                             </SheetTitle>
                             <SheetDescription className="text-zinc-400 font-mono text-xs">
                                 Configure physical interface parameters directly.
@@ -111,22 +113,12 @@ export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess }: Inter
                 </SheetContent>
             </Sheet>
 
-            {/* EL FIX: Agregamos "isZoneDrawerOpen &&" al principio */}
             {isZoneDrawerOpen && (
-                <ZoneEditDrawer
-                    isOpen={isZoneDrawerOpen}
-                    onClose={() => setIsZoneDrawerOpen(false)}
-                    zoneName={formZone}
-                />
+                <ZoneEditDrawer isOpen={isZoneDrawerOpen} onClose={() => setIsZoneDrawerOpen(false)} zoneName={formZone} />
             )}
 
-            {/* Ya que estamos, protejamos el DHCP también */}
             {isDhcpModalOpen && (
-                <DhcpModal
-                    isOpen={isDhcpModalOpen}
-                    onClose={() => setIsDhcpModalOpen(false)}
-                    interfaceName={iface?.name || ''}
-                />
+                <DhcpModal isOpen={isDhcpModalOpen} onClose={() => setIsDhcpModalOpen(false)} interfaceName={iface?.name || ''} />
             )}
         </>
     );
