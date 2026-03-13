@@ -14,7 +14,7 @@ import { ResourceSelector } from './ResourceSelector';
 import { ManagementSelector } from './ManagementSelector';
 import { ZoneEditDrawer } from './ZoneEditDrawer';
 import { InterfaceEditDrawer } from './InterfaceEditDrawer';
-import DhcpModal from '../DhcpModal';
+import { DhcpDrawer } from './DhcpDrawer';
 
 interface VlanEditDrawerProps {
     isOpen: boolean;
@@ -185,7 +185,7 @@ export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess }: VlanEditDra
             )}
 
             {isDhcpModalOpen && (
-                <DhcpModal isOpen={isDhcpModalOpen} onClose={() => setIsDhcpModalOpen(false)} interfaceName={`${formParent}.${formId}`} />
+                <DhcpDrawer isOpen={isDhcpModalOpen} onClose={() => setIsDhcpModalOpen(false)} interfaceName={`${formParent}.${formId}`} />
             )}
         </>
     );

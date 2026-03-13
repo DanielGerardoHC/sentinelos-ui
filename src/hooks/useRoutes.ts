@@ -40,12 +40,14 @@ export function useRoutes() {
     const saveRoute = async (method: 'POST' | 'PUT', routeId: number | null, payload: Partial<RouteInterface>) => {
         setIsLoading(true);
         setError('');
+        let sessionStarted = false; // Candado Anti-Deadlock
+
         try {
             const resBegin = await fetch('/api/config/begin', { method: 'POST', headers: getHeaders() });
             if (!resBegin.ok) throw new Error(await resBegin.text());
+            sessionStarted = true;
 
             const url = method === 'PUT' ? `/api/routes/${routeId}` : '/api/routes';
-
             const resUpdate = await fetch(url, {
                 method: method,
                 headers: getHeaders(),
@@ -54,12 +56,18 @@ export function useRoutes() {
             if (!resUpdate.ok) throw new Error(await resUpdate.text());
 
             const resCommit = await fetch('/api/config/commit', { method: 'POST', headers: getHeaders() });
-            if (!resCommit.ok) throw new Error(await resCommit.text());
+            sessionStarted = false; // Liberamos la sesión
+
+            if (!resCommit.ok) throw new Error(`Validation Error: ${await resCommit.text()}`);
 
             await fetchRoutes();
             return true;
         } catch (err: any) {
             setError(err.message || 'Error in route transaction');
+            if (sessionStarted) {
+                try { await fetch('/api/config/commit', { method: 'POST', headers: getHeaders() }); }
+                catch (cleanupErr) { console.error("Cleanup commit failed:", cleanupErr); }
+            }
             return false;
         } finally {
             setIsLoading(false);
@@ -69,20 +77,29 @@ export function useRoutes() {
     const deleteRoute = async (routeId: number) => {
         setIsLoading(true);
         setError('');
+        let sessionStarted = false;
+
         try {
             const resBegin = await fetch('/api/config/begin', { method: 'POST', headers: getHeaders() });
             if (!resBegin.ok) throw new Error(await resBegin.text());
+            sessionStarted = true;
 
             const resDelete = await fetch(`/api/routes/${routeId}`, { method: 'DELETE', headers: getHeaders() });
             if (!resDelete.ok) throw new Error(await resDelete.text());
 
             const resCommit = await fetch('/api/config/commit', { method: 'POST', headers: getHeaders() });
-            if (!resCommit.ok) throw new Error(await resCommit.text());
+            sessionStarted = false;
+
+            if (!resCommit.ok) throw new Error(`Validation Error: ${await resCommit.text()}`);
 
             await fetchRoutes();
             return true;
         } catch (err: any) {
             setError(err.message || 'Error deleting route');
+            if (sessionStarted) {
+                try { await fetch('/api/config/commit', { method: 'POST', headers: getHeaders() }); }
+                catch (e) { console.error("Cleanup commit failed:", e); }
+            }
             return false;
         } finally {
             setIsLoading(false);

@@ -12,17 +12,18 @@ import { AdminStateSelector } from './AdminStateSelector';
 import { ResourceSelector } from './ResourceSelector';
 import { ManagementSelector } from './ManagementSelector';
 import { ZoneEditDrawer } from './ZoneEditDrawer';
-import DhcpModal from '../DhcpModal';
+import { DhcpDrawer } from './DhcpDrawer';
 
 interface InterfaceEditDrawerProps {
     isOpen: boolean;
     onClose: () => void;
     iface: NetworkInterface | null;
     onSuccess?: () => void;
+    onError?: (msg: string) => void; // <--- Prop para enviar error a la página
 }
 
-export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess }: InterfaceEditDrawerProps) {
-    const { updateInterface, isLoading } = useInterfaces();
+export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess, onError }: InterfaceEditDrawerProps) {
+    const { updateInterface, isLoading, error } = useInterfaces();
     const { zones, fetchZones } = useZones();
 
     const [formIp, setFormIp] = useState('');
@@ -44,6 +45,11 @@ export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess }: Inter
         }
     }, [iface]);
 
+    // Comunicar error del backend
+    useEffect(() => {
+        if (error && onError) onError(error);
+    }, [error, onError]);
+
     const handleSave = async () => {
         if (!iface) return;
         const payload = { ip: formIp, zone: formZone, state: formState, management: formManagement };
@@ -60,8 +66,7 @@ export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess }: Inter
 
     const zoneOptions = zones.map(z => ({ label: `${z.name.toUpperCase()} (${z.type})`, value: z.name }));
 
-    // --- LÓGICA DE EFECTOS VISUALES ---
-    const slideOffset = isZoneDrawerOpen ? '150px' : '0px';
+    const slideOffset = isZoneDrawerOpen || isDhcpModalOpen ? '150px' : '0px';
     const isChildOpen = isZoneDrawerOpen || isDhcpModalOpen;
 
     return (
@@ -69,7 +74,6 @@ export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess }: Inter
             <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
                 <SheetContent
                     style={{ right: slideOffset }}
-                    // FIX: Ancho 650px y efecto de difuminado oscuro si hay un panel hijo abierto
                     className={`bg-[#09090b] border-l border-zinc-800 text-zinc-100 w-full sm:w-[650px] sm:!max-w-[650px] p-0 flex flex-col h-full transition-all duration-300 shadow-2xl shadow-black z-[60] ${isChildOpen ? 'blur-[2px] brightness-50 pointer-events-none' : ''}`}
                 >
                     <div className="p-6 border-b border-zinc-800 bg-zinc-950/50">
@@ -89,7 +93,7 @@ export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess }: Inter
 
                         <div className="space-y-3">
                             <Label className="text-zinc-500 font-mono text-xs uppercase">IPv4 Address (CIDR)</Label>
-                            <Input value={formIp} onChange={(e) => setFormIp(e.target.value)} className="bg-zinc-950 border-zinc-800 text-emerald-400 font-mono h-11" placeholder="e.g. 192.168.1.1/24" />
+                            <Input value={formIp} onChange={(e) => setFormIp(e.target.value)} className="bg-zinc-950 border-zinc-800 text-emerald-400 font-mono h-11 focus-visible:ring-emerald-500/50" placeholder="e.g. 192.168.1.1/24" />
                         </div>
 
                         <ResourceSelector label="Security Zone" value={formZone} onChange={setFormZone} options={zoneOptions} onEditClick={() => setIsZoneDrawerOpen(true)} />
@@ -118,7 +122,7 @@ export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess }: Inter
             )}
 
             {isDhcpModalOpen && (
-                <DhcpModal isOpen={isDhcpModalOpen} onClose={() => setIsDhcpModalOpen(false)} interfaceName={iface?.name || ''} />
+                <DhcpDrawer isOpen={isDhcpModalOpen} onClose={() => setIsDhcpModalOpen(false)} interfaceName={iface?.name || ''} />
             )}
         </>
     );

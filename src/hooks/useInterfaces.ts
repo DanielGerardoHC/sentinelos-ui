@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 
-// Definimos la estructura exacta que nos devuelve tu API en Go
 export interface NetworkInterface {
     name: string;
     ip: string;
@@ -22,15 +21,13 @@ export function useInterfaces() {
         };
     };
 
-    // Función para LEER las interfaces
     const fetchInterfaces = useCallback(async () => {
         setIsLoading(true);
         try {
             const res = await fetch('/api/interfaces', { headers: getHeaders() });
             if (!res.ok) throw new Error('Error al obtener interfaces');
-
             const data = await res.json();
-            setInterfaces(data); // Guardamos la respuesta de Go en la memoria de React
+            setInterfaces(data);
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -38,15 +35,16 @@ export function useInterfaces() {
         }
     }, []);
 
-    // Función para ACTUALIZAR (El flujo transaccional que platicamos)
     const updateInterface = async (interfaceName: string, changes: Partial<NetworkInterface>) => {
         setIsLoading(true);
         setError('');
+        let sessionStarted = false; // Candado Anti-Deadlock
 
         try {
             // 1. BEGIN
             const resBegin = await fetch('/api/config/begin', { method: 'POST', headers: getHeaders() });
             if (!resBegin.ok) throw new Error(await resBegin.text());
+            sessionStarted = true;
 
             // 2. CANDIDATE UPDATE
             const resUpdate = await fetch(`/api/interfaces/${interfaceName}`, {
@@ -58,14 +56,21 @@ export function useInterfaces() {
 
             // 3. COMMIT
             const resCommit = await fetch('/api/config/commit', { method: 'POST', headers: getHeaders() });
-            if (!resCommit.ok) throw new Error(await resCommit.text());
+            sessionStarted = false; // Liberamos la sesión
 
-            // Si todo sale bien, refrescamos la tabla para ver el cambio real
+            if (!resCommit.ok) throw new Error(`Validation Error: ${await resCommit.text()}`);
+
             await fetchInterfaces();
             return true;
 
         } catch (err: any) {
             setError(err.message || 'Error en la transacción');
+
+            // CATCH DE SEGURIDAD
+            if (sessionStarted) {
+                try { await fetch('/api/config/commit', { method: 'POST', headers: getHeaders() }); }
+                catch (e) { console.error("Cleanup commit failed:", e); }
+            }
             return false;
         } finally {
             setIsLoading(false);

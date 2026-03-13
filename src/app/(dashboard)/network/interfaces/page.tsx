@@ -6,24 +6,28 @@ import { useInterfaces, NetworkInterface } from '@/hooks/useInterfaces';
 import { PageHeader } from '@/components/firewall/PageHeader';
 import { StatusBadge, ZoneBadge } from '@/components/firewall/FirewallBadges';
 import { FirewallTable } from '@/components/firewall/FirewallTable';
-import { InterfaceEditDrawer } from '@/components/firewall/InterfaceEditDrawer'; // <-- USAMOS NUESTRO COMPONENTE
+import { InterfaceEditDrawer } from '@/components/firewall/InterfaceEditDrawer';
+import { AlertModal } from '@/components/firewall/AlertModal'; // <-- IMPORTAMOS ALERTA
 
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit2, ShieldAlert, Activity } from "lucide-react";
+import { Edit2, Activity } from "lucide-react"; // Quitamos ShieldAlert
 
 export default function InterfacesPage() {
-    const { interfaces, fetchInterfaces, isLoading, error } = useInterfaces();
+    const { interfaces, fetchInterfaces, isLoading, error: fetchError } = useInterfaces();
 
-    // Solo necesitamos saber si el cajón está abierto y qué interfaz le pasamos
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedIface, setSelectedIface] = useState<NetworkInterface | null>(null);
+
+    // Estado para manejar el error que nos escupa el Drawer
+    const [transactionError, setTransactionError] = useState('');
 
     useEffect(() => {
         fetchInterfaces();
     }, [fetchInterfaces]);
 
     const handleEditClick = (iface: NetworkInterface) => {
+        setTransactionError(''); // Limpiar errores anteriores
         setSelectedIface(iface);
         setIsDrawerOpen(true);
     };
@@ -33,6 +37,8 @@ export default function InterfacesPage() {
         { label: "IP / Netmask" }, { label: "Zone" }, { label: "Management" }, { label: "Actions", className: "text-right" }
     ];
 
+    const displayError = transactionError || fetchError;
+
     return (
         <div className="space-y-6 relative overflow-hidden">
             <PageHeader
@@ -40,11 +46,22 @@ export default function InterfacesPage() {
                 description="Manage physical and virtual interfaces, IP assignments, and security zones."
                 isLoading={isLoading}
                 onRefresh={fetchInterfaces}
-                onAdd={() => {}}
+                onAdd={() => alert("Función no disponible en API.")}
                 addText="+ Add Interface"
             />
 
-            {error && (<div className="p-4 bg-red-950/50 border border-red-500/50 text-red-400 font-mono flex items-center gap-3 rounded-lg"><ShieldAlert className="w-5 h-5" /> {error}</div>)}
+            {/* ALERTA VISUAL TIPO MODAL PARA ERRORES DE BACKEND */}
+            <AlertModal
+                isOpen={!!displayError}
+                type="error"
+                title="Configuration Error"
+                message={displayError}
+                onCancel={() => {
+                    setTransactionError('');
+                    // No podemos limpiar fetchError aquí porque viene del hook,
+                    // pero el usuario puede darle "Refresh" a la página.
+                }}
+            />
 
             <FirewallTable columns={tableColumns} isEmpty={interfaces.length === 0} isLoading={isLoading} emptyMessage="No interfaces found.">
                 {interfaces.map((iface) => (
@@ -75,6 +92,10 @@ export default function InterfacesPage() {
                     onClose={() => setIsDrawerOpen(false)}
                     iface={selectedIface}
                     onSuccess={fetchInterfaces}
+                    onError={(msg) => {
+                        setIsDrawerOpen(false); // Cierra el cajón para mostrar la alerta gigante
+                        setTransactionError(msg);
+                    }}
                 />
             )}
         </div>

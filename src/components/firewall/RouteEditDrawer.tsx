@@ -1,3 +1,4 @@
+// Ruta: src/components/firewall/RouteEditDrawer.tsx
 import { useState, useEffect } from 'react';
 import { useRoutes, RouteInterface } from '@/hooks/useRoutes';
 import { useInterfaces } from '@/hooks/useInterfaces';
@@ -6,20 +7,21 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Route, Save, ShieldAlert } from "lucide-react"; // <-- Agregamos ShieldAlert
+import { Route, Save } from "lucide-react";
 
 import { ResourceSelector } from './ResourceSelector';
 import { InterfaceEditDrawer } from './InterfaceEditDrawer';
+import { AlertModal } from './AlertModal';
 
 interface RouteEditDrawerProps {
     isOpen: boolean;
     onClose: () => void;
     routeData: RouteInterface | null;
     onSuccess?: () => void;
+    onError?: (msg: string) => void;
 }
 
-export function RouteEditDrawer({ isOpen, onClose, routeData, onSuccess }: RouteEditDrawerProps) {
-    // EXTRAEMOS 'error' DEL HOOK PARA MOSTRARLO
+export function RouteEditDrawer({ isOpen, onClose, routeData, onSuccess, onError }: RouteEditDrawerProps) {
     const { saveRoute, isLoading, error } = useRoutes();
     const { interfaces, fetchInterfaces } = useInterfaces();
 
@@ -32,6 +34,9 @@ export function RouteEditDrawer({ isOpen, onClose, routeData, onSuccess }: Route
     const [formDescription, setFormDescription] = useState('');
 
     const [isInterfaceDrawerOpen, setIsInterfaceDrawerOpen] = useState(false);
+
+    // Estado para alerta de validación local (ej. no ingresó destino)
+    const [localAlert, setLocalAlert] = useState<{isOpen: boolean, msg: string}>({isOpen: false, msg: ''});
 
     useEffect(() => {
         if (isOpen) {
@@ -52,8 +57,18 @@ export function RouteEditDrawer({ isOpen, onClose, routeData, onSuccess }: Route
         }
     }, [isOpen, routeData, fetchInterfaces]);
 
+    // Comunicar el error del backend a la página padre
+    useEffect(() => {
+        if (error && onError) {
+            onError(error);
+        }
+    }, [error, onError]);
+
     const handleSave = async () => {
-        if (!formDestination) return alert("Destination network is required.");
+        if (!formDestination) {
+            setLocalAlert({ isOpen: true, msg: "Destination network is required to save the route." });
+            return;
+        }
 
         const payload: Partial<RouteInterface> = {
             destination: formDestination,
@@ -77,7 +92,7 @@ export function RouteEditDrawer({ isOpen, onClose, routeData, onSuccess }: Route
 
     const selectedInterfaceObj = interfaces.find(i => i.name === formInterface) || null;
     const slideOffset = isInterfaceDrawerOpen ? '150px' : '0px';
-    const isChildOpen = isInterfaceDrawerOpen;
+    const isChildOpen = isInterfaceDrawerOpen || localAlert.isOpen;
 
     return (
         <>
@@ -97,13 +112,6 @@ export function RouteEditDrawer({ isOpen, onClose, routeData, onSuccess }: Route
                             </SheetDescription>
                         </SheetHeader>
                     </div>
-
-                    {/* ALERTA DE ERROR VISUAL */}
-                    {error && (
-                        <div className="p-4 bg-red-950/50 border-b border-red-500/50 text-red-400 font-mono text-sm flex items-center gap-3">
-                            <ShieldAlert className="w-5 h-5 flex-shrink-0" /> {error}
-                        </div>
-                    )}
 
                     <div className="p-6 space-y-6 flex-1 overflow-y-auto">
                         <div className="space-y-3">
@@ -137,6 +145,15 @@ export function RouteEditDrawer({ isOpen, onClose, routeData, onSuccess }: Route
                     </div>
                 </SheetContent>
             </Sheet>
+
+            {/* ALERTA DE ERROR LOCAL */}
+            <AlertModal
+                isOpen={localAlert.isOpen}
+                type="error"
+                title="Validation Error"
+                message={localAlert.msg}
+                onCancel={() => setLocalAlert({ isOpen: false, msg: '' })}
+            />
 
             {isInterfaceDrawerOpen && (
                 <InterfaceEditDrawer isOpen={isInterfaceDrawerOpen} onClose={() => setIsInterfaceDrawerOpen(false)} iface={selectedInterfaceObj} onSuccess={fetchInterfaces} />
