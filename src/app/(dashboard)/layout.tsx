@@ -58,7 +58,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     logoAlt="SentinelOS Logo"
                     items={[
                         { label: 'System', href: '/system' },
-                        { label: 'Network', href: '/network' },
+                        { label: 'Network', href: '/network/interfaces' },
                         { label: 'Policies', href: '/policies' },
                         { label: 'Monitor', href: '/monitor' },
                         { label: 'Objects', href: '/objects' }
