@@ -24,7 +24,6 @@ interface ZoneEditDrawerProps {
     zoneData: Zone | null;
     onSuccess?: () => void;
     onError?: (msg: string) => void;
-    zIndex?: number; // <--- NUEVO
 }
 
 // Nuestra paleta estandarizada
@@ -37,7 +36,7 @@ const COLOR_TOKENS = [
     { value: 'zinc', bg: 'bg-zinc-500' },
 ];
 
-export function ZoneEditDrawer({ isOpen, onClose, zoneData, onSuccess, onError, zIndex }: ZoneEditDrawerProps) {    const { saveZone, isLoading, error } = useZones();
+export function ZoneEditDrawer({ isOpen, onClose, zoneData, onSuccess, onError}: ZoneEditDrawerProps) {    const { saveZone, isLoading, error } = useZones();
     const { interfaces: physicalInterfaces, fetchInterfaces } = useInterfaces();
 
     const isEditMode = !!zoneData;
@@ -119,7 +118,7 @@ export function ZoneEditDrawer({ isOpen, onClose, zoneData, onSuccess, onError, 
         <>
             <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
                 <SheetContent
-                    style={{ right: slideOffset, zIndex: zIndex || 50 }}
+                    style={{ right: slideOffset }}
                     className={`bg-[#09090b] border-l border-zinc-800 text-zinc-100 w-full sm:w-[650px] sm:!max-w-[650px] p-0 flex flex-col h-full shadow-2xl shadow-black transition-all duration-300 ${isChildOpen ? 'blur-[2px] brightness-50 pointer-events-none' : ''}`}
                 >
                     <div className="p-6 border-b border-zinc-800 bg-zinc-950/50">
@@ -229,7 +228,6 @@ export function ZoneEditDrawer({ isOpen, onClose, zoneData, onSuccess, onError, 
                     onClose={() => setIsInterfaceDrawerOpen(false)}
                     iface={selectedInterfaceObj}
                     onSuccess={fetchInterfaces}
-                    zIndex={80}
                 />
             )}
         </>

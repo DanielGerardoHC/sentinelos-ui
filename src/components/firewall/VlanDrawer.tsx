@@ -128,7 +128,7 @@ export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess, onError }: Vl
             <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
                 <SheetContent
                     style={{ right: slideOffset }}
-                    className={`bg-[#09090b] border-l border-zinc-800 text-zinc-100 w-full sm:w-[650px] sm:!max-w-[650px] p-0 flex flex-col h-full transition-all duration-300 ease-in-out z-[50] ${isChildOpen ? 'blur-[2px] brightness-50 pointer-events-none' : ''}`}
+                    className={`bg-[#09090b] border-l border-zinc-800 text-zinc-100 w-full sm:w-[650px] sm:!max-w-[650px] p-0 flex flex-col h-full transition-all duration-300 ease-in-out  ${isChildOpen ? 'blur-[2px] brightness-50 pointer-events-none' : ''}`}
                 >
                     <div className="p-6 border-b border-zinc-800 bg-zinc-950/50">
                         <SheetHeader>

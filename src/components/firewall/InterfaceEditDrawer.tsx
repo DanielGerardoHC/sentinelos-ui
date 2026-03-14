@@ -27,10 +27,9 @@ interface InterfaceEditDrawerProps {
     iface: NetworkInterface | null;
     onSuccess?: () => void;
     onError?: (msg: string) => void;
-    zIndex?: number;
 }
 
-export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess, onError, zIndex }: InterfaceEditDrawerProps) {    const { updateInterface, isLoading, error } = useInterfaces();
+export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess, onError }: InterfaceEditDrawerProps) {    const { updateInterface, isLoading, error } = useInterfaces();
     const { zones, fetchZones } = useZones();
 
     const [formIp, setFormIp] = useState('');
@@ -80,8 +79,8 @@ export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess, onError
         <>
             <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
                 <SheetContent
-                    style={{ right: slideOffset, zIndex: zIndex || 60 }}
-                    className={`bg-[#09090b] border-l border-zinc-800 text-zinc-100 w-full sm:w-[650px] sm:!max-w-[650px] p-0 flex flex-col h-full transition-all duration-300 shadow-2xl shadow-black ${isChildOpen ? 'blur-[2px] brightness-50 pointer-events-none' : ''}`}
+                    style={{ right: slideOffset }}
+                    className={`bg-[#09090b] border-l border-zinc-800 text-zinc-100 w-full sm:w-[650px] sm:!max-w-[650px] p-0 flex flex-col h-full shadow-2xl shadow-black transition-all duration-300 ${isChildOpen ? 'blur-[2px] brightness-50 pointer-events-none' : ''}`}
                 >
                     <div className="p-6 border-b border-zinc-800 bg-zinc-950/50">
                         <SheetHeader>
@@ -129,7 +128,7 @@ export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess, onError
                     isOpen={isZoneDrawerOpen}
                     onClose={() => setIsZoneDrawerOpen(false)}
                     zoneData={selectedZoneObj}
-                    onSuccess={fetchZones} // Refresca las zonas en el drawer actual si creaste una nueva
+                    onSuccess={fetchZones}
                 />
             )}
 
