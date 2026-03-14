@@ -36,6 +36,13 @@ const sidebarData = {
             ]
         },
         { label: 'Admins', ariaLabel: 'Admins', link: '/system/admins' },
+    ],
+    objects: [
+        {
+            label: 'zones',
+            ariaLabel: 'Zones',
+            link: 'objects/zones',
+        }
     ]
 };
 
