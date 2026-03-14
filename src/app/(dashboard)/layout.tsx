@@ -52,7 +52,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     let activeModule = 'system';
     if (pathname.includes('/network')) activeModule = 'network';
     if (pathname.includes('/policies')) activeModule = 'policies';
-    if (pathname.includes('/objects')) activeModule = 'object';
+    if (pathname.includes('/objects')) activeModule = 'objects';
 
     const currentLeftMenu = sidebarData[activeModule as keyof typeof sidebarData];
 
