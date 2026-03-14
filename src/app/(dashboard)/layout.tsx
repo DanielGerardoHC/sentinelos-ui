@@ -68,7 +68,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         { label: 'Network', href: '/network/interfaces' },
                         { label: 'Policies', href: '/policies' },
                         { label: 'Monitor', href: '/monitor' },
-                        { label: 'Objects', href: '/objects' }
+                        { label: 'Objects', href: '/objects/zones' }
                     ]}
                     activeHref={pathname.split('/').slice(0, 3).join('/')}
                     className="custom-nav"
