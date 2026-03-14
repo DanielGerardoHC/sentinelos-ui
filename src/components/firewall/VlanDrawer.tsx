@@ -42,6 +42,8 @@ export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess, onError }: Vl
     const [isZoneSheetOpen, setIsZoneSheetOpen] = useState(false);
     const [isParentSheetOpen, setIsParentSheetOpen] = useState(false);
     const [isDhcpModalOpen, setIsDhcpModalOpen] = useState(false);
+    const [isZoneDrawerOpen, setIsZoneDrawerOpen] = useState(false);
+    const selectedZoneObj = zones.find(z => z.name === formZone) || null;
 
     const [localAlert, setLocalAlert] = useState<{isOpen: boolean, msg: string}>({isOpen: false, msg: ''});
 
@@ -194,8 +196,13 @@ export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess, onError }: Vl
                 onCancel={() => setLocalAlert({ isOpen: false, msg: '' })}
             />
 
-            {isZoneSheetOpen && (
-                <ZoneEditDrawer isOpen={isZoneSheetOpen} onClose={() => setIsZoneSheetOpen(false)} zoneName={formZone} />
+            {isZoneDrawerOpen && (
+                <ZoneEditDrawer
+                    isOpen={isZoneDrawerOpen}
+                    onClose={() => setIsZoneDrawerOpen(false)}
+                    zoneData={selectedZoneObj}
+                    onSuccess={fetchZones} // Refresca las zonas en el drawer actual si creaste una nueva
+                />
             )}
 
             {isParentSheetOpen && (

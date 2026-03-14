@@ -67,6 +67,7 @@ export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess, onError
 
     const slideOffset = isZoneDrawerOpen || isDhcpModalOpen ? '150px' : '0px';
     const isChildOpen = isZoneDrawerOpen || isDhcpModalOpen;
+    const selectedZoneObj = zones.find(z => z.name === formZone) || null;
 
     return (
         <>
@@ -117,7 +118,12 @@ export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess, onError
             </Sheet>
 
             {isZoneDrawerOpen && (
-                <ZoneEditDrawer isOpen={isZoneDrawerOpen} onClose={() => setIsZoneDrawerOpen(false)} zoneName={formZone} />
+                <ZoneEditDrawer
+                    isOpen={isZoneDrawerOpen}
+                    onClose={() => setIsZoneDrawerOpen(false)}
+                    zoneData={selectedZoneObj}
+                    onSuccess={fetchZones} // Refresca las zonas en el drawer actual si creaste una nueva
+                />
             )}
 
             {isDhcpModalOpen && (
