@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useZones, Zone } from '@/hooks/useZones';
 import { useInterfaces, NetworkInterface } from '@/hooks/useInterfaces';
 
-import { InterfaceEditDrawer } from './InterfaceEditDrawer';
+
 import { AlertModal } from './AlertModal';
 
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -10,6 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Shield, Save, Edit2, X, Plus, Palette } from "lucide-react";
+import dynamic from 'next/dynamic';
+
+// Importación dinámica para romper la dependencia circular
+const InterfaceEditDrawer = dynamic(
+    () => import('./InterfaceEditDrawer').then((mod) => mod.InterfaceEditDrawer),
+    { ssr: false }
+);
 
 interface ZoneEditDrawerProps {
     isOpen: boolean;

@@ -11,8 +11,15 @@ import { Activity, Save, Server } from "lucide-react";
 import { AdminStateSelector } from './AdminStateSelector';
 import { ResourceSelector } from './ResourceSelector';
 import { ManagementSelector } from './ManagementSelector';
-import { ZoneEditDrawer } from './ZoneEditDrawer';
+
 import { DhcpDrawer } from './DhcpDrawer';
+import dynamic from 'next/dynamic';
+
+// Importación dinámica para romper la dependencia circular
+const ZoneEditDrawer = dynamic(
+    () => import('./ZoneEditDrawer').then((mod) => mod.ZoneEditDrawer),
+    { ssr: false }
+);
 
 interface InterfaceEditDrawerProps {
     isOpen: boolean;
