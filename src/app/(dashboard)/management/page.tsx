@@ -35,13 +35,14 @@ export default function ManagementPage() {
     return (
         <div className="space-y-6 relative overflow-hidden">
             <PageHeader
-                title="System Management"
-                description="Platform configuration, identity, and localization."
+                title={t('mgmt.title', 'System Management')}
+                description={t('mgmt.desc', 'Platform configuration, identity, and localization.')}
                 onRefresh={fetchAllInfo}
                 isLoading={isLoading}
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
 
                 <div className="space-y-6 col-span-1">
                     <div className="border border-zinc-800/50 bg-[#09090b]/50 backdrop-blur-sm rounded-xl p-6 shadow-xl">
@@ -51,10 +52,10 @@ export default function ManagementPage() {
                             </div>
                             <div>
                                 <h3 className="text-sm font-bold font-mono text-zinc-100 uppercase tracking-wider">
-                                    Interface Language
+                                    {t('mgmt.lang_title', 'Interface Language')}
                                 </h3>
                                 <p className="text-xs font-mono text-zinc-500 mt-1">
-                                    Select the default localization.
+                                    {t('mgmt.lang_desc', 'Select the default localization.')}
                                 </p>
                             </div>
                         </div>
@@ -83,7 +84,6 @@ export default function ManagementPage() {
                     </div>
                 </div>
 
-
                 <div className="col-span-1 lg:col-span-2 space-y-6">
 
 
@@ -96,7 +96,7 @@ export default function ManagementPage() {
                             </div>
                             <div className="flex-1 w-full">
                                 <h3 className="text-lg font-bold font-mono text-zinc-100 uppercase tracking-wider flex items-center gap-2">
-                                    Admin Profile <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                                    {t('mgmt.card_admin', 'Admin Profile')} <ShieldCheck className="w-4 h-4 text-emerald-500" />
                                 </h3>
 
                                 {isLoading && !user ? (
@@ -104,17 +104,17 @@ export default function ManagementPage() {
                                 ) : user ? (
                                     <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div className="p-3 bg-zinc-950/50 border border-zinc-800/50 rounded-lg">
-                                            <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider mb-1">Username</p>
+                                            <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider mb-1">{t('common.username', 'Username')}</p>
                                             <p className="text-sm text-zinc-200 font-mono">{user.username}</p>
                                         </div>
                                         <div className="p-3 bg-zinc-950/50 border border-zinc-800/50 rounded-lg">
-                                            <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider mb-1">Role / Privilege</p>
+                                            <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider mb-1">{t('common.role', 'Role / Privilege')}</p>
                                             <p className={`text-sm font-mono uppercase tracking-wider ${user.role === 'superadmin' ? 'text-emerald-400 font-bold' : 'text-zinc-300'}`}>
                                                 {user.role}
                                             </p>
                                         </div>
                                         <div className="p-3 bg-zinc-950/50 border border-zinc-800/50 rounded-lg">
-                                            <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider mb-1">Session Expires</p>
+                                            <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider mb-1">{t('common.expires', 'Session Expires')}</p>
                                             <p className="text-xs text-zinc-400 font-mono mt-1">{formatExpiration(user.expires)}</p>
                                         </div>
                                     </div>
@@ -125,21 +125,19 @@ export default function ManagementPage() {
                         </div>
                     </div>
 
-
                     <div className="border border-zinc-800/50 bg-[#09090b]/50 backdrop-blur-sm rounded-xl p-6 shadow-xl flex items-start gap-4">
                         <div className="p-4 bg-zinc-950 rounded-full border border-zinc-800">
                             <Activity className="w-8 h-8 text-zinc-300" />
                         </div>
                         <div className="flex-1 w-full">
                             <h3 className="text-lg font-bold font-mono text-zinc-100 uppercase tracking-wider mb-4">
-                                SentinelOS Core Status
+                                {t('mgmt.card_status', 'SentinelOS Core Status')}
                             </h3>
 
                             {isLoading && !status ? (
                                 <div className="flex items-center justify-center p-6 text-emerald-500"><Loader2 className="w-6 h-6 animate-spin" /></div>
                             ) : status ? (
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-
 
                                     <div className="p-4 bg-zinc-950/80 border border-zinc-800/50 rounded-lg flex flex-col items-center justify-center text-center gap-2 relative overflow-hidden">
                                         <ShieldCheck className={`w-6 h-6 ${status.firewall ? 'text-emerald-500' : 'text-red-500'}`} />
@@ -152,7 +150,6 @@ export default function ManagementPage() {
                                         </div>
                                     </div>
 
-
                                     <div className="p-4 bg-zinc-950/80 border border-zinc-800/50 rounded-lg flex flex-col items-center justify-center text-center gap-2">
                                         <Server className={`w-6 h-6 ${status.dhcp ? 'text-emerald-500' : 'text-zinc-600'}`} />
                                         <div className="space-y-1">
@@ -164,7 +161,6 @@ export default function ManagementPage() {
                                         </div>
                                     </div>
 
-
                                     <div className="p-4 bg-zinc-950/80 border border-zinc-800/50 rounded-lg flex flex-col items-center justify-center text-center gap-2">
                                         <Network className="w-6 h-6 text-zinc-400" />
                                         <div className="space-y-1">
@@ -172,7 +168,6 @@ export default function ManagementPage() {
                                             <p className="text-xl font-bold font-mono text-zinc-100">{status.interfaces}</p>
                                         </div>
                                     </div>
-
 
                                     <div className="p-4 bg-zinc-950/80 border border-zinc-800/50 rounded-lg flex flex-col items-center justify-center text-center gap-2">
                                         <Route className="w-6 h-6 text-zinc-400" />
