@@ -13,7 +13,7 @@ export default function ManagementPage() {
 
     useEffect(() => {
         setMounted(true);
-        fetchAllInfo(); // Cargamos los datos al montar la página
+        fetchAllInfo();
     }, [fetchAllInfo]);
 
     const changeLanguage = (lng: string) => {
@@ -25,7 +25,6 @@ export default function ManagementPage() {
 
     const currentLang = i18n.resolvedLanguage || 'en';
 
-    // Función para formatear el timestamp Unix (ej. 1773713564) a formato local
     const formatExpiration = (unixTime: number) => {
         return new Date(unixTime * 1000).toLocaleString(currentLang, {
             year: 'numeric', month: 'short', day: 'numeric',

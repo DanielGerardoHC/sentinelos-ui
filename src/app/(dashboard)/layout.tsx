@@ -35,7 +35,7 @@ const sidebarData = {
                 { label: 'Threats', link: '/system/threats' }
             ]
         },
-        { label: 'Admins', ariaLabel: 'Admins', link: '/system/admins' },
+        { label: 'Admins', ariaLabel: 'Admins', link: '/management' },
     ],
     objects: [
         {
