@@ -6,8 +6,8 @@ interface PageHeaderProps {
     description: string;
     isLoading: boolean;
     onRefresh: () => void;
-    onAdd: () => void;
-    addText: string;
+    onAdd?: () => void;
+    addText?: string;
 }
 
 export function PageHeader({ title, description, isLoading, onRefresh, onAdd, addText }: PageHeaderProps) {

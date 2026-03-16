@@ -41,7 +41,7 @@ const sidebarData = {
         {
             label: 'zones',
             ariaLabel: 'Zones',
-            link: 'objects/zones',
+            link: '/zones',
         }
     ]
 };

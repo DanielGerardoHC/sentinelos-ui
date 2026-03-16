@@ -1,0 +1,35 @@
+{
+  "errors": {
+    "ERR_NET_1001": "Invalid IP or CIDR format.",
+    "ERR_NET_1002": "Missing required field.",
+    "ERR_NET_1003": "Resource not found.",
+    "ERR_NET_1004": "Invalid JSON payload.",
+    "ERR_NET_1005": "Invalid zone type.",
+    "ERR_NET_1006": "Invalid protocol.",
+    "ERR_NET_1007": "Invalid subnet mask.",
+    "ERR_NET_1008": "Invalid port number.",
+    "ERR_NET_1009": "Method not allowed.",
+    "ERR_NET_2001": "Interface acts as parent for VLANs and cannot have an IP.",
+    "ERR_NET_2002": "Parent interface cannot be down while child VLAN is up.",
+    "ERR_NET_2003": "Resource references an unknown entity.",
+    "ERR_NET_2004": "Duplicate IP address detected.",
+    "ERR_NET_2005": "VLAN references an unknown parent interface.",
+    "ERR_NET_2006": "Resource already exists.",
+
+    "ERR_SEC_1001": "Invalid NAT action.",
+    "ERR_SEC_1002": "Invalid policy action.",
+    "ERR_SEC_2001": "Invalid policy reference.",
+    "ERR_SEC_5001": "Missing authorization token.",
+    "ERR_SEC_5002": "Invalid token format.",
+    "ERR_SEC_5003": "Invalid or expired token.",
+    "ERR_SEC_5004": "User account disabled.",
+    "ERR_SEC_5005": "Invalid credentials.",
+    "ERR_SEC_5006": "Failed to generate token.",
+
+    "ERR_SYS_3001": "No active config session.",
+    "ERR_SYS_3002": "Config already locked by another user.",
+    "ERR_SYS_3003": "Failed to apply runtime configuration.",
+    "ERR_SYS_3004": "Failed to create config backup.",
+    "ERR_SYS_4001": "Internal server error."
+  }
+}

@@ -1,5 +1,6 @@
 import { ShieldAlert, CheckCircle2, AlertTriangle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 export type AlertType = 'success' | 'error' | 'confirm';
 
@@ -26,8 +27,30 @@ export function AlertModal({
                                cancelText = "CANCEL",
                                isLoading = false
                            }: AlertModalProps) {
+    const { t } = useTranslation();
 
     if (!isOpen) return null;
+
+    // --- INTERCEPTOR DE ERRORES DEL BACKEND ---
+    let finalMessage = message;
+    let finalDetails = "";
+
+    try {
+        // Limpiamos los prefijos que nuestros Hooks a veces agregan
+        const cleanMessage = message.replace(/^Validation Error:\s*/, '').trim();
+
+        // Intentamos parsear el JSON que envía Go
+        const parsed = JSON.parse(cleanMessage);
+
+        if (parsed && parsed.code) {
+            // Buscamos el código en nuestro i18n. Si no existe, usamos el mensaje en inglés que mandó Go.
+            finalMessage = t(`errors.${parsed.code}`, { defaultValue: parsed.message });
+            finalDetails = parsed.details || "";
+        }
+    } catch (e) {
+        // Si no es un JSON válido (ej. un error de red o de sistema genérico), lo dejamos como string crudo
+        finalMessage = message;
+    }
 
     const config = {
         success: {
@@ -62,13 +85,21 @@ export function AlertModal({
                         {currentConfig.icon}
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-3 w-full">
                         <h3 className="text-xl font-bold font-mono text-zinc-100 tracking-tight">
                             {title}
                         </h3>
                         <p className="text-sm font-mono text-zinc-400 leading-relaxed">
-                            {message}
+                            {finalMessage}
                         </p>
+
+                        {/* Cajita extra para los Detalles técnicos (si Go los envía) */}
+                        {finalDetails && (
+                            <div className="mt-3 p-2 bg-zinc-950/80 border border-zinc-800/50 rounded text-xs font-mono text-zinc-500 break-all text-left">
+                                <span className="text-zinc-400 uppercase tracking-wider block mb-1">Details:</span>
+                                {finalDetails}
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -79,7 +110,8 @@ export function AlertModal({
                             onClick={onCancel}
                             className="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-mono uppercase tracking-wider text-xs"
                         >
-                            CLOSE
+                            {/* Podemos traducir el botón CLOSE si tienes un namespace 'common', por ahora lo dejamos estático o usamos t('common.close', 'CLOSE') */}
+                            {t('common.close', 'CLOSE')}
                         </Button>
                     ) : (
                         <>
@@ -90,7 +122,7 @@ export function AlertModal({
                                     disabled={isLoading}
                                     className="flex-1 border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 font-mono uppercase tracking-wider text-xs"
                                 >
-                                    {cancelText}
+                                    {t('common.cancel', cancelText)}
                                 </Button>
                             )}
 
@@ -99,7 +131,7 @@ export function AlertModal({
                                 disabled={isLoading}
                                 className={`flex-1 font-mono uppercase tracking-wider text-xs ${currentConfig.confirmBtn}`}
                             >
-                                {isLoading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : confirmText}
+                                {isLoading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : t('common.confirm', confirmText)}
                             </Button>
                         </>
                     )}

@@ -1,0 +1,35 @@
+{
+  "errors": {
+    "ERR_NET_1001": "Formato de IP o CIDR inválido.",
+    "ERR_NET_1002": "Campo obligatorio faltante.",
+    "ERR_NET_1003": "Recurso no encontrado.",
+    "ERR_NET_1004": "Carga útil JSON inválida.",
+    "ERR_NET_1005": "Tipo de zona inválido.",
+    "ERR_NET_1006": "Protocolo inválido.",
+    "ERR_NET_1007": "Máscara de subred inválida.",
+    "ERR_NET_1008": "Número de puerto inválido.",
+    "ERR_NET_1009": "Método no permitido.",
+    "ERR_NET_2001": "La interfaz actúa como padre para VLANs y no puede tener una IP asignada.",
+    "ERR_NET_2002": "La interfaz padre no puede estar apagada mientras una VLAN hija esté encendida.",
+    "ERR_NET_2003": "El recurso hace referencia a una entidad desconocida.",
+    "ERR_NET_2004": "Se ha detectado una dirección IP duplicada.",
+    "ERR_NET_2005": "La VLAN hace referencia a una interfaz padre desconocida.",
+    "ERR_NET_2006": "El recurso ya existe en la configuración.",
+
+    "ERR_SEC_1001": "Acción NAT inválida.",
+    "ERR_SEC_1002": "Acción de política inválida.",
+    "ERR_SEC_2001": "Referencia de política inválida.",
+    "ERR_SEC_5001": "Token de autorización faltante.",
+    "ERR_SEC_5002": "Formato de token inválido.",
+    "ERR_SEC_5003": "Token inválido o expirado.",
+    "ERR_SEC_5004": "Cuenta de usuario deshabilitada.",
+    "ERR_SEC_5005": "Credenciales inválidas.",
+    "ERR_SEC_5006": "Error al generar el token de seguridad.",
+
+    "ERR_SYS_3001": "No hay una sesión de configuración activa.",
+    "ERR_SYS_3002": "La configuración ya está bloqueada por otro usuario.",
+    "ERR_SYS_3003": "Error al aplicar la configuración en tiempo de ejecución.",
+    "ERR_SYS_3004": "Error al crear el respaldo de la configuración.",
+    "ERR_SYS_4001": "Error interno del servidor."
+  }
+}
