@@ -7,26 +7,38 @@ import { PageHeader } from '@/components/firewall/PageHeader';
 import { Globe, User, Activity, CheckCircle2, ShieldCheck, Server, Network, Route, Loader2 } from "lucide-react";
 
 export default function ManagementPage() {
-    const { t, i18n } = useTranslation();
+    const { i18n } = useTranslation();
     const [mounted, setMounted] = useState(false);
+
+    // Estado local estricto para forzar a React a pintar la selección
+    const [activeLang, setActiveLang] = useState('en');
+
     const { user, status, fetchAllInfo, isLoading } = useSystemInfo();
 
     useEffect(() => {
         setMounted(true);
         fetchAllInfo();
-    }, [fetchAllInfo]);
+
+        // Al cargar, leemos el idioma guardado o usamos inglés por defecto
+        const savedLang = localStorage.getItem('i18nextLng') || i18n.language || 'en';
+        // Extraemos solo las dos primeras letras (ej. 'es-ES' -> 'es')
+        const shortLang = savedLang.substring(0, 2);
+        setActiveLang(['en', 'es', 'fr', 'zh'].includes(shortLang) ? shortLang : 'en');
+    }, [fetchAllInfo, i18n.language]);
 
     const changeLanguage = (lng: string) => {
+        // 1. Cambiamos el idioma en el motor
         i18n.changeLanguage(lng);
+        // 2. Guardamos en el navegador
         localStorage.setItem('i18nextLng', lng);
+        // 3. Forzamos a la UI a actualizar el botón verde
+        setActiveLang(lng);
     };
 
     if (!mounted) return null;
 
-    const currentLang = i18n.resolvedLanguage || 'en';
-
     const formatExpiration = (unixTime: number) => {
-        return new Date(unixTime * 1000).toLocaleString(currentLang, {
+        return new Date(unixTime * 1000).toLocaleString(activeLang, {
             year: 'numeric', month: 'short', day: 'numeric',
             hour: '2-digit', minute: '2-digit'
         });
@@ -35,15 +47,15 @@ export default function ManagementPage() {
     return (
         <div className="space-y-6 relative overflow-hidden">
             <PageHeader
-                title={t('mgmt.title', 'System Management')}
-                description={t('mgmt.desc', 'Platform configuration, identity, and localization.')}
+                title="System Management"
+                description="Platform configuration, identity, and localization."
                 onRefresh={fetchAllInfo}
                 isLoading={isLoading}
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-
+                {/* COLUMNA IZQUIERDA: Configuración del Sistema (Idioma) */}
                 <div className="space-y-6 col-span-1">
                     <div className="border border-zinc-800/50 bg-[#09090b]/50 backdrop-blur-sm rounded-xl p-6 shadow-xl">
                         <div className="flex items-center gap-3 mb-6 pb-4 border-b border-zinc-800/50">
@@ -52,10 +64,10 @@ export default function ManagementPage() {
                             </div>
                             <div>
                                 <h3 className="text-sm font-bold font-mono text-zinc-100 uppercase tracking-wider">
-                                    {t('mgmt.lang_title', 'Interface Language')}
+                                    Interface Language
                                 </h3>
                                 <p className="text-xs font-mono text-zinc-500 mt-1">
-                                    {t('mgmt.lang_desc', 'Select the default localization.')}
+                                    Select the default localization.
                                 </p>
                             </div>
                         </div>
@@ -71,22 +83,23 @@ export default function ManagementPage() {
                                     key={lang.code}
                                     onClick={() => changeLanguage(lang.code)}
                                     className={`flex items-center justify-between p-3 rounded-lg border font-mono text-sm transition-all duration-200 ${
-                                        currentLang.startsWith(lang.code)
+                                        activeLang === lang.code
                                             ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
                                             : 'border-zinc-800 bg-zinc-950 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
                                     }`}
                                 >
                                     <span>{lang.label}</span>
-                                    {currentLang.startsWith(lang.code) && <CheckCircle2 className="w-4 h-4" />}
+                                    {activeLang === lang.code && <CheckCircle2 className="w-4 h-4" />}
                                 </button>
                             ))}
                         </div>
                     </div>
                 </div>
 
+                {/* COLUMNA DERECHA: Perfil y Status */}
                 <div className="col-span-1 lg:col-span-2 space-y-6">
 
-
+                    {/* Tarjeta de Administrador */}
                     <div className="border border-zinc-800/50 bg-[#09090b]/50 backdrop-blur-sm rounded-xl p-6 shadow-xl relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none transition-opacity group-hover:bg-emerald-500/10" />
 
@@ -96,7 +109,7 @@ export default function ManagementPage() {
                             </div>
                             <div className="flex-1 w-full">
                                 <h3 className="text-lg font-bold font-mono text-zinc-100 uppercase tracking-wider flex items-center gap-2">
-                                    {t('mgmt.card_admin', 'Admin Profile')} <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                                    Admin Profile <ShieldCheck className="w-4 h-4 text-emerald-500" />
                                 </h3>
 
                                 {isLoading && !user ? (
@@ -104,17 +117,17 @@ export default function ManagementPage() {
                                 ) : user ? (
                                     <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div className="p-3 bg-zinc-950/50 border border-zinc-800/50 rounded-lg">
-                                            <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider mb-1">{t('common.username', 'Username')}</p>
+                                            <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider mb-1">Username</p>
                                             <p className="text-sm text-zinc-200 font-mono">{user.username}</p>
                                         </div>
                                         <div className="p-3 bg-zinc-950/50 border border-zinc-800/50 rounded-lg">
-                                            <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider mb-1">{t('common.role', 'Role / Privilege')}</p>
+                                            <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider mb-1">Role / Privilege</p>
                                             <p className={`text-sm font-mono uppercase tracking-wider ${user.role === 'superadmin' ? 'text-emerald-400 font-bold' : 'text-zinc-300'}`}>
                                                 {user.role}
                                             </p>
                                         </div>
                                         <div className="p-3 bg-zinc-950/50 border border-zinc-800/50 rounded-lg">
-                                            <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider mb-1">{t('common.expires', 'Session Expires')}</p>
+                                            <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider mb-1">Session Expires</p>
                                             <p className="text-xs text-zinc-400 font-mono mt-1">{formatExpiration(user.expires)}</p>
                                         </div>
                                     </div>
@@ -125,13 +138,14 @@ export default function ManagementPage() {
                         </div>
                     </div>
 
+                    {/* Tarjeta de Status del Firewall */}
                     <div className="border border-zinc-800/50 bg-[#09090b]/50 backdrop-blur-sm rounded-xl p-6 shadow-xl flex items-start gap-4">
                         <div className="p-4 bg-zinc-950 rounded-full border border-zinc-800">
                             <Activity className="w-8 h-8 text-zinc-300" />
                         </div>
                         <div className="flex-1 w-full">
                             <h3 className="text-lg font-bold font-mono text-zinc-100 uppercase tracking-wider mb-4">
-                                {t('mgmt.card_status', 'SentinelOS Core Status')}
+                                SentinelOS Core Status
                             </h3>
 
                             {isLoading && !status ? (
@@ -139,6 +153,7 @@ export default function ManagementPage() {
                             ) : status ? (
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 
+                                    {/* Módulo Firewall */}
                                     <div className="p-4 bg-zinc-950/80 border border-zinc-800/50 rounded-lg flex flex-col items-center justify-center text-center gap-2 relative overflow-hidden">
                                         <ShieldCheck className={`w-6 h-6 ${status.firewall ? 'text-emerald-500' : 'text-red-500'}`} />
                                         <div className="space-y-1">
@@ -150,6 +165,7 @@ export default function ManagementPage() {
                                         </div>
                                     </div>
 
+                                    {/* Módulo DHCP */}
                                     <div className="p-4 bg-zinc-950/80 border border-zinc-800/50 rounded-lg flex flex-col items-center justify-center text-center gap-2">
                                         <Server className={`w-6 h-6 ${status.dhcp ? 'text-emerald-500' : 'text-zinc-600'}`} />
                                         <div className="space-y-1">
@@ -161,6 +177,7 @@ export default function ManagementPage() {
                                         </div>
                                     </div>
 
+                                    {/* Conteo Interfaces */}
                                     <div className="p-4 bg-zinc-950/80 border border-zinc-800/50 rounded-lg flex flex-col items-center justify-center text-center gap-2">
                                         <Network className="w-6 h-6 text-zinc-400" />
                                         <div className="space-y-1">
@@ -169,6 +186,7 @@ export default function ManagementPage() {
                                         </div>
                                     </div>
 
+                                    {/* Conteo Rutas */}
                                     <div className="p-4 bg-zinc-950/80 border border-zinc-800/50 rounded-lg flex flex-col items-center justify-center text-center gap-2">
                                         <Route className="w-6 h-6 text-zinc-400" />
                                         <div className="space-y-1">
