@@ -6,6 +6,7 @@ import PillNav from '@/components/ui/PillNavbar/PillNav';
 import StaggeredMenu from '@/components/ui/StaggeredMenu/StaggeredMenu';
 import { Shield } from 'lucide-react'; // Usaremos esto en lugar del logo temporal
 
+
 // opciones dinamicas para el menu izquierdo
 const sidebarData = {
     network: [
