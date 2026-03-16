@@ -1,0 +1,35 @@
+{
+  "errors": {
+    "ERR_NET_1001": "Format IP ou CIDR invalide.",
+    "ERR_NET_1002": "Champ obligatoire manquant.",
+    "ERR_NET_1003": "Ressource introuvable.",
+    "ERR_NET_1004": "Charge utile JSON invalide.",
+    "ERR_NET_1005": "Type de zone invalide.",
+    "ERR_NET_1006": "Protocole invalide.",
+    "ERR_NET_1007": "Masque de sous-réseau invalide.",
+    "ERR_NET_1008": "Numéro de port invalide.",
+    "ERR_NET_1009": "Méthode non autorisée.",
+    "ERR_NET_2001": "L'interface agit comme parent pour les VLANs et ne peut pas avoir d'adresse IP.",
+    "ERR_NET_2002": "L'interface parent ne peut pas être désactivée tant qu'un VLAN enfant est activé.",
+    "ERR_NET_2003": "La ressource fait référence à une entité inconnue.",
+    "ERR_NET_2004": "Adresse IP dupliquée détectée.",
+    "ERR_NET_2005": "Le VLAN fait référence à une interface parent inconnue.",
+    "ERR_NET_2006": "La ressource existe déjà.",
+
+    "ERR_SEC_1001": "Action NAT invalide.",
+    "ERR_SEC_1002": "Action de politique invalide.",
+    "ERR_SEC_2001": "Référence de politique invalide.",
+    "ERR_SEC_5001": "Jeton d'autorisation manquant.",
+    "ERR_SEC_5002": "Format de jeton invalide.",
+    "ERR_SEC_5003": "Jeton invalide ou expiré.",
+    "ERR_SEC_5004": "Compte utilisateur désactivé.",
+    "ERR_SEC_5005": "Identifiants invalides.",
+    "ERR_SEC_5006": "Échec de la génération du jeton.",
+
+    "ERR_SYS_3001": "Aucune session de configuration active.",
+    "ERR_SYS_3002": "La configuration est déjà verrouillée par un autre utilisateur.",
+    "ERR_SYS_3003": "Échec de l'application de la configuration en cours d'exécution.",
+    "ERR_SYS_3004": "Échec de la création de la sauvegarde de configuration.",
+    "ERR_SYS_4001": "Erreur interne du serveur."
+  }
+}
