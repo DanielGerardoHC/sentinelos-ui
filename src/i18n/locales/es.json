@@ -1,4 +1,24 @@
 {
+  "mgmt": {
+    "title": "Gestión del Sistema",
+    "desc": "Configuración de plataforma, identidad y localización.",
+    "lang_title": "Idioma de la Interfaz",
+    "lang_desc": "Selecciona la localización por defecto.",
+    "admin_title": "Perfil de Administrador",
+    "username": "Usuario",
+    "role": "Rol / Privilegio",
+    "expires": "La Sesión Expira",
+    "status_title": "Estado del Núcleo SentinelOS",
+    "firewall_engine": "Motor Firewall",
+    "active": "ACTIVO",
+    "disabled": "DESHABILITADO",
+    "dhcp_service": "Servicio DHCP",
+    "running": "EN EJECUCIÓN",
+    "stopped": "DETENIDO",
+    "interfaces": "Interfaces",
+    "routing_table": "Tabla de Rutas",
+    "data_unavailable": "Datos no disponibles."
+  },
   "nav": {
     "system": "Sistema",
     "network": "Red",

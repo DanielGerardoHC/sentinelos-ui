@@ -1,4 +1,24 @@
 {
+  "mgmt": {
+    "title": "System Management",
+    "desc": "Platform configuration, identity, and localization.",
+    "lang_title": "Interface Language",
+    "lang_desc": "Select the default localization.",
+    "admin_title": "Admin Profile",
+    "username": "Username",
+    "role": "Role / Privilege",
+    "expires": "Session Expires",
+    "status_title": "SentinelOS Core Status",
+    "firewall_engine": "Firewall Engine",
+    "active": "ACTIVE",
+    "disabled": "DISABLED",
+    "dhcp_service": "DHCP Service",
+    "running": "RUNNING",
+    "stopped": "STOPPED",
+    "interfaces": "Interfaces",
+    "routing_table": "Routing Table",
+    "data_unavailable": "Data unavailable."
+  },
   "nav": {
     "system": "System",
     "network": "Network",
