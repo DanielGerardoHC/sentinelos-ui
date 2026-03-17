@@ -1,4 +1,34 @@
 {
+  "nav": {
+    "system": "Système",
+    "network": "Réseau",
+    "policies": "Politiques",
+    "monitor": "Surveillance",
+    "objects": "Objets"
+  },
+  "sidebar": {
+    "network": {
+      "interfaces": "Interfaces",
+      "vlans_sub": "Vlans",
+      "routing": "Routage",
+      "vlans_vxlan": "VLANs et VXLAN"
+    },
+    "policies": {
+      "rules": "Règles de Sécurité",
+      "nat": "NAT",
+      "binding": "Liaison IP-MAC"
+    },
+    "system": {
+      "dashboard": "Tableau de Bord",
+      "overview": "Aperçu du Système",
+      "users": "Utilisateurs",
+      "threats": "Menaces",
+      "admins": "Administrateurs"
+    },
+    "objects": {
+      "zones": "Zones"
+    }
+  },
   "errors": {
     "ERR_NET_1001": "Format IP ou CIDR invalide.",
     "ERR_NET_1002": "Champ obligatoire manquant.",

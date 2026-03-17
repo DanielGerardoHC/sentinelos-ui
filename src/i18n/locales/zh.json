@@ -1,4 +1,34 @@
 {
+  "nav": {
+    "system": "系统",
+    "network": "网络",
+    "policies": "策略",
+    "monitor": "监控",
+    "objects": "对象"
+  },
+  "sidebar": {
+    "network": {
+      "interfaces": "接口",
+      "vlans_sub": "Vlans",
+      "routing": "路由",
+      "vlans_vxlan": "VLANs 与 VXLAN"
+    },
+    "policies": {
+      "rules": "安全规则",
+      "nat": "NAT",
+      "binding": "IP-MAC 绑定"
+    },
+    "system": {
+      "dashboard": "仪表板",
+      "overview": "系统概览",
+      "users": "用户",
+      "threats": "威胁",
+      "admins": "管理员"
+    },
+    "objects": {
+      "zones": "区域"
+    }
+  },
   "errors": {
     "ERR_NET_1001": "IP 或 CIDR 格式无效。",
     "ERR_NET_1002": "缺少必填字段。",

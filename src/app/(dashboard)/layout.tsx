@@ -72,7 +72,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
         <div className="min-h-screen bg-[#09090b] text-zinc-100 flex flex-col">
 
-            {/* --- NAVBAR SUPERIOR --- */}
             <header className="h-16 border-b border-zinc-800 bg-black/50 flex items-center justify-center relative z-50 pl-24">
                 <PillNav
                     logo="/assets/shield.svg"
@@ -97,7 +96,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             <div className="flex flex-1 relative overflow-hidden">
 
-                {/* --- SIDEBAR IZQUIERDO --- */}
+
                 <div className="absolute top-0 left-0 h-full z-40">
                     <StaggeredMenu
                         position="left"
@@ -117,7 +116,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     />
                 </div>
 
-                {/* --- AREA DE CONTENIDO DINAMICO --- */}
                 <main
                     className={`flex-1 p-8 overflow-y-auto transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                         isMenuOpen ? 'ml-[260px]' : 'ml-24'
