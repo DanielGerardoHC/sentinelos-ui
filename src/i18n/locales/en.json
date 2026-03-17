@@ -1,4 +1,34 @@
 {
+  "nav": {
+    "system": "System",
+    "network": "Network",
+    "policies": "Policies",
+    "monitor": "Monitor",
+    "objects": "Objects"
+  },
+  "sidebar": {
+    "network": {
+      "interfaces": "Interfaces",
+      "vlans_sub": "Vlans",
+      "routing": "Routing",
+      "vlans_vxlan": "VLANs & VXLAN"
+    },
+    "policies": {
+      "rules": "Security Rules",
+      "nat": "NAT",
+      "binding": "IP-MAC Binding"
+    },
+    "system": {
+      "dashboard": "Dashboard",
+      "overview": "System Overview",
+      "users": "Users",
+      "threats": "Threats",
+      "admins": "Admins"
+    },
+    "objects": {
+      "zones": "Zones"
+    }
+  },
   "errors": {
     "ERR_NET_1001": "Invalid IP or CIDR format.",
     "ERR_NET_1002": "Missing required field.",
