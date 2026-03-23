@@ -1,4 +1,69 @@
 {
+  "dhcp_drawer": {
+    "title": "Servidor DHCP: {{interface}}",
+    "desc": "Configura el pool de asignación automática de IP para esta red.",
+    "enable_dhcp": "Habilitar Servidor DHCP",
+    "start_ip": "IP Inicial del Rango",
+    "end_ip": "IP Final del Rango",
+    "gateway": "Puerta de Enlace (Gateway)",
+    "lease_time": "Tiempo de Concesión (Minutos)",
+    "dns1": "DNS Primario",
+    "dns2": "DNS Secundario",
+    "cancel": "Cancelar",
+    "save": "GUARDAR AJUSTES"
+  },
+  "admin_state": {
+    "title": "Estado Administrativo",
+    "up": "ACTIVO",
+    "down": "INACTIVO"
+  },
+  "iface_drawer": {
+    "edit_title": "Editar Interfaz: {{name}}",
+    "drawer_desc": "Configura los parámetros de la interfaz física directamente.",
+    "ipv4": "Dirección IPv4 (CIDR)",
+    "ipv4_placeholder": "ej. 192.168.1.1/24",
+    "sec_zone": "Zona de Seguridad",
+    "services": "Servicios",
+    "config_dhcp": "Configurar Servidor DHCP",
+    "back": "ATRÁS",
+    "saving": "GUARDANDO...",
+    "apply": "APLICAR CAMBIOS"
+  },
+  "route_drawer": {
+    "edit_route": "Editar Ruta Estática",
+    "create_route": "Crear Ruta Estática",
+    "drawer_desc": "Configura el enrutamiento del próximo salto y las métricas de ruta.",
+    "dest_network": "Red de Destino (CIDR)",
+    "dest_placeholder": "ej. 0.0.0.0/0 (Ruta por Defecto) o 10.50.0.0/24",
+    "next_hop": "Próximo Salto / Puerta de Enlace",
+    "admin_dist": "Distancia Administrativa",
+    "egress_iface": "Interfaz de Salida",
+    "desc_optional": "Descripción (Opcional)",
+    "desc_placeholder": "ej. Ruta a Oficina Sucursal",
+    "cancel": "CANCELAR",
+    "committing": "APLICANDO...",
+    "apply": "APLICAR CAMBIOS",
+    "val_error": "Error de Validación",
+    "dest_req": "La red de destino es obligatoria para guardar la ruta."
+  },
+  "vlan_drawer": {
+    "req_fields": "El ID de la VLAN y la Interfaz Padre son obligatorios.",
+    "invalid_parent": "No se puede usar {{parent}} como padre. Tiene una IP asignada (Capa 3 activa). Quítele la IP primero.",
+    "l3_active": "(L3 Activa - Inválido)",
+    "l2_ready": "(L2 Lista)",
+    "edit_vlan": "Editar VLAN {{id}}",
+    "create_vlan": "Crear Nueva VLAN",
+    "vlan_id": "ID de VLAN (Etiqueta)",
+    "parent_iface": "Interfaz Padre",
+    "ipv4": "Dirección IPv4 (CIDR)",
+    "sec_zone": "Zona de Seguridad",
+    "services": "Servicios",
+    "config_dhcp": "Configurar Servidor DHCP",
+    "cancel": "CANCELAR",
+    "committing": "APLICANDO...",
+    "apply": "APLICAR CAMBIOS",
+    "val_error": "Error de Validación"
+  },
   "routing": {
     "title": "Enrutamiento Estático",
     "desc": "Gestiona la tabla de rutas global y las métricas del próximo salto.",
@@ -61,6 +126,8 @@
     "config_error": "Error de Configuración"
   },
   "zones": {
+    "type_change_title": "¿Cambiar Tipo de Zona?",
+    "type_change_confirm": "SÍ, PROCEDER",
     "page_title": "Zonas de Seguridad",
     "page_desc": "Aislamiento lógico y agrupación de interfaces de red.",
     "page_add_btn": "AÑADIR ZONA",

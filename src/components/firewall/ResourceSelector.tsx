@@ -23,7 +23,6 @@ export function ResourceSelector({ label, value, onChange, options, onEditClick,
             <Label className="text-zinc-500 font-mono text-xs uppercase tracking-wider">{label}</Label>
             <div className="flex gap-2">
                 <div className="relative flex-1">
-                    {/* Aplicando tu regla de contraste: bg-zinc-950 puro */}
                     <select
                         value={value}
                         onChange={(e) => onChange(e.target.value)}
@@ -42,7 +41,6 @@ export function ResourceSelector({ label, value, onChange, options, onEditClick,
                     </div>
                 </div>
 
-                {/* El botón de editar (Lápiz) a la par del Select */}
                 {onEditClick && (
                     <Button
                         type="button"

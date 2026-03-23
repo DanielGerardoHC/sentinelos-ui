@@ -1,5 +1,5 @@
-// Ruta: src/components/firewall/RouteEditDrawer.tsx
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useRoutes, RouteInterface } from '@/hooks/useRoutes';
 import { useInterfaces } from '@/hooks/useInterfaces';
 
@@ -22,6 +22,7 @@ interface RouteEditDrawerProps {
 }
 
 export function RouteEditDrawer({ isOpen, onClose, routeData, onSuccess, onError }: RouteEditDrawerProps) {
+    const { t } = useTranslation();
     const { saveRoute, isLoading, error } = useRoutes();
     const { interfaces, fetchInterfaces } = useInterfaces();
 
@@ -34,7 +35,6 @@ export function RouteEditDrawer({ isOpen, onClose, routeData, onSuccess, onError
     const [formDescription, setFormDescription] = useState('');
 
     const [isInterfaceDrawerOpen, setIsInterfaceDrawerOpen] = useState(false);
-
     const [localAlert, setLocalAlert] = useState<{isOpen: boolean, msg: string}>({isOpen: false, msg: ''});
 
     useEffect(() => {
@@ -64,7 +64,7 @@ export function RouteEditDrawer({ isOpen, onClose, routeData, onSuccess, onError
 
     const handleSave = async () => {
         if (!formDestination) {
-            setLocalAlert({ isOpen: true, msg: "Destination network is required to save the route." });
+            setLocalAlert({ isOpen: true, msg: t('route_drawer.dest_req') });
             return;
         }
 
@@ -103,43 +103,43 @@ export function RouteEditDrawer({ isOpen, onClose, routeData, onSuccess, onError
                         <SheetHeader>
                             <SheetTitle className="text-zinc-100 font-mono text-2xl flex items-center gap-3">
                                 <Route className="w-5 h-5 text-emerald-500" />
-                                {isEditMode ? `Edit Static Route` : 'Create Static Route'}
+                                {isEditMode ? t('route_drawer.edit_route') : t('route_drawer.create_route')}
                             </SheetTitle>
                             <SheetDescription className="text-zinc-400 font-mono text-xs">
-                                Configure next-hop routing and path metrics.
+                                {t('route_drawer.drawer_desc')}
                             </SheetDescription>
                         </SheetHeader>
                     </div>
 
                     <div className="p-6 space-y-6 flex-1 overflow-y-auto">
                         <div className="space-y-3">
-                            <Label className="text-zinc-500 font-mono text-xs uppercase">Destination Network (CIDR)</Label>
-                            <Input value={formDestination} onChange={(e) => setFormDestination(e.target.value)} className="bg-zinc-950 border-zinc-800 text-emerald-400 font-mono h-11 focus-visible:ring-emerald-500/50" placeholder="e.g. 0.0.0.0/0 (Default Route) or 10.50.0.0/24" />
+                            <Label className="text-zinc-500 font-mono text-xs uppercase">{t('route_drawer.dest_network')}</Label>
+                            <Input value={formDestination} onChange={(e) => setFormDestination(e.target.value)} className="bg-zinc-950 border-zinc-800 text-emerald-400 font-mono h-11 focus-visible:ring-emerald-500/50" placeholder={t('route_drawer.dest_placeholder')} />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-3">
-                                <Label className="text-zinc-500 font-mono text-xs uppercase">Next-Hop Gateway</Label>
+                                <Label className="text-zinc-500 font-mono text-xs uppercase">{t('route_drawer.next_hop')}</Label>
                                 <Input value={formGateway} onChange={(e) => setFormGateway(e.target.value)} className="bg-zinc-950 border-zinc-800 text-emerald-400 font-mono h-11 focus-visible:ring-emerald-500/50" placeholder="e.g. 192.168.1.1" />
                             </div>
 
                             <div className="space-y-3">
-                                <Label className="text-zinc-500 font-mono text-xs uppercase">Administrative Distance</Label>
+                                <Label className="text-zinc-500 font-mono text-xs uppercase">{t('route_drawer.admin_dist')}</Label>
                                 <Input type="number" value={formMetric} onChange={(e) => setFormMetric(e.target.value ? Number(e.target.value) : '')} className="bg-zinc-950 border-zinc-800 text-emerald-400 font-mono h-11 focus-visible:ring-emerald-500/50" placeholder="10" />
                             </div>
                         </div>
 
-                        <ResourceSelector label="Egress Interface" value={formInterface} onChange={setFormInterface} options={interfaceOptions} onEditClick={() => setIsInterfaceDrawerOpen(true)} />
+                        <ResourceSelector label={t('route_drawer.egress_iface')} value={formInterface} onChange={setFormInterface} options={interfaceOptions} onEditClick={() => setIsInterfaceDrawerOpen(true)} />
 
                         <div className="space-y-3">
-                            <Label className="text-zinc-500 font-mono text-xs uppercase">Description (Optional)</Label>
-                            <Input value={formDescription} onChange={(e) => setFormDescription(e.target.value)} className="bg-zinc-950 border-zinc-800 text-zinc-300 font-mono h-11 focus-visible:ring-emerald-500/50" placeholder="e.g. Route to Branch Office" />
+                            <Label className="text-zinc-500 font-mono text-xs uppercase">{t('route_drawer.desc_optional')}</Label>
+                            <Input value={formDescription} onChange={(e) => setFormDescription(e.target.value)} className="bg-zinc-950 border-zinc-800 text-zinc-300 font-mono h-11 focus-visible:ring-emerald-500/50" placeholder={t('route_drawer.desc_placeholder')} />
                         </div>
                     </div>
 
                     <div className="p-6 border-t border-zinc-800 bg-zinc-950/50 flex justify-end gap-3">
-                        <Button variant="outline" onClick={onClose} className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 font-mono uppercase text-xs">Cancel</Button>
-                        <Button onClick={handleSave} disabled={isLoading} className="bg-emerald-600 hover:bg-emerald-500 text-white font-mono uppercase text-xs"><Save className="w-4 h-4 mr-2" /> {isLoading ? 'COMMITTING...' : 'APPLY CHANGES'}</Button>
+                        <Button variant="outline" onClick={onClose} className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 font-mono uppercase text-xs">{t('route_drawer.cancel')}</Button>
+                        <Button onClick={handleSave} disabled={isLoading} className="bg-emerald-600 hover:bg-emerald-500 text-white font-mono uppercase text-xs"><Save className="w-4 h-4 mr-2" /> {isLoading ? t('route_drawer.committing') : t('route_drawer.apply')}</Button>
                     </div>
                 </SheetContent>
             </Sheet>
@@ -147,7 +147,7 @@ export function RouteEditDrawer({ isOpen, onClose, routeData, onSuccess, onError
             <AlertModal
                 isOpen={localAlert.isOpen}
                 type="error"
-                title="Validation Error"
+                title={t('route_drawer.val_error')}
                 message={localAlert.msg}
                 onCancel={() => setLocalAlert({ isOpen: false, msg: '' })}
             />

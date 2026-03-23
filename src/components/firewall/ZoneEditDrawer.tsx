@@ -50,6 +50,7 @@ export function ZoneEditDrawer({ isOpen, onClose, zoneData, onSuccess, onError}:
     const [selectedInterfaceObj, setSelectedInterfaceObj] = useState<NetworkInterface | null>(null);
 
     const [localAlert, setLocalAlert] = useState({ isOpen: false, msg: '' });
+    const [typeChangeConfirm, setTypeChangeConfirm] = useState({ isOpen: false, pendingType: '' });
 
     useEffect(() => {
         if (isOpen) {
@@ -82,10 +83,19 @@ export function ZoneEditDrawer({ isOpen, onClose, zoneData, onSuccess, onError}:
     });
 
     const handleTypeChange = (newType: string) => {
-        if (formInterfaces.length > 0 && !confirm(t('zones.type_warn'))) return;
-        setFormType(newType);
+        if (formInterfaces.length > 0) {
+            setTypeChangeConfirm({ isOpen: true, pendingType: newType });
+        } else {
+            setFormType(newType);
+            setSelectedToAdd('');
+        }
+    };
+
+    const confirmTypeChange = () => {
+        setFormType(typeChangeConfirm.pendingType);
         setFormInterfaces([]);
         setSelectedToAdd('');
+        setTypeChangeConfirm({ isOpen: false, pendingType: '' });
     };
 
     const handleSave = async () => {
@@ -110,7 +120,7 @@ export function ZoneEditDrawer({ isOpen, onClose, zoneData, onSuccess, onError}:
     };
 
     const slideOffset = isInterfaceDrawerOpen ? '150px' : '0px';
-    const isChildOpen = isInterfaceDrawerOpen || localAlert.isOpen;
+    const isChildOpen = isInterfaceDrawerOpen || localAlert.isOpen || typeChangeConfirm.isOpen;
 
     return (
         <>
@@ -214,6 +224,16 @@ export function ZoneEditDrawer({ isOpen, onClose, zoneData, onSuccess, onError}:
             </Sheet>
 
             <AlertModal isOpen={localAlert.isOpen} type="error" title={t('zones.val_error')} message={localAlert.msg} onCancel={() => setLocalAlert({ isOpen: false, msg: '' })} />
+
+            <AlertModal
+                isOpen={typeChangeConfirm.isOpen}
+                type="confirm"
+                title={t('zones.type_change_title')}
+                message={t('zones.type_warn')}
+                confirmText={t('zones.type_change_confirm')}
+                onConfirm={confirmTypeChange}
+                onCancel={() => setTypeChangeConfirm({ isOpen: false, pendingType: '' })}
+            />
 
             {isInterfaceDrawerOpen && (
                 <InterfaceEditDrawer

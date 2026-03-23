@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useVlans, VlanInterface } from '@/hooks/useVlans';
 import { useInterfaces } from '@/hooks/useInterfaces';
 import { useZones } from '@/hooks/useZones';
@@ -28,6 +29,7 @@ interface VlanEditDrawerProps {
 }
 
 export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess, onError }: VlanEditDrawerProps) {
+    const { t } = useTranslation();
     const { saveVlan, isLoading, error } = useVlans();
     const { interfaces: physicalInterfaces, fetchInterfaces: fetchPhysicalInterfaces } = useInterfaces();
     const { zones, fetchZones } = useZones();
@@ -79,13 +81,13 @@ export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess, onError }: Vl
 
     const handleSave = async () => {
         if (!formId || !formParent) {
-            setLocalAlert({ isOpen: true, msg: "VLAN ID and Parent Interface are required." });
+            setLocalAlert({ isOpen: true, msg: t('vlan_drawer.req_fields') });
             return;
         }
 
         const parentInterface = physicalInterfaces.find(iface => iface.name === formParent);
         if (parentInterface && parentInterface.ip) {
-            setLocalAlert({ isOpen: true, msg: `Cannot use ${formParent} as parent. It has an IP assigned (Layer 3 active). Remove its IP first.` });
+            setLocalAlert({ isOpen: true, msg: t('vlan_drawer.invalid_parent', { parent: formParent }) });
             return;
         }
 
@@ -107,7 +109,7 @@ export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess, onError }: Vl
     };
 
     const parentOptions = physicalInterfaces.map(iface => ({
-        label: `${iface.name} ${iface.ip ? '(L3 Active - Invalid)' : '(L2 Ready)'}`,
+        label: `${iface.name} ${iface.ip ? t('vlan_drawer.l3_active') : t('vlan_drawer.l2_ready')}`,
         value: iface.name,
         disabled: !!iface.ip
     }));
@@ -133,7 +135,7 @@ export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess, onError }: Vl
                         <SheetHeader>
                             <SheetTitle className="text-zinc-100 font-mono text-2xl flex items-center gap-3">
                                 <Layers className="w-5 h-5 text-emerald-500" />
-                                {isEditMode ? `Edit VLAN ${formId}` : 'Create New VLAN'}
+                                {isEditMode ? t('vlan_drawer.edit_vlan', { id: formId }) : t('vlan_drawer.create_vlan')}
                             </SheetTitle>
                         </SheetHeader>
                     </div>
@@ -141,12 +143,12 @@ export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess, onError }: Vl
                     <div className="p-6 space-y-6 flex-1 overflow-y-auto">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-3">
-                                <Label className="text-zinc-500 font-mono text-xs uppercase">VLAN ID (Tag)</Label>
+                                <Label className="text-zinc-500 font-mono text-xs uppercase">{t('vlan_drawer.vlan_id')}</Label>
                                 <Input type="number" value={formId} onChange={(e) => setFormId(e.target.value ? Number(e.target.value) : '')} disabled={isEditMode} className="bg-zinc-950 border-zinc-800 text-emerald-400 font-mono h-11 focus-visible:ring-emerald-500/50" placeholder="e.g. 10" />
                             </div>
 
                             <ResourceSelector
-                                label="Parent Interface"
+                                label={t('vlan_drawer.parent_iface')}
                                 value={formParent}
                                 onChange={setFormParent}
                                 options={parentOptions}
@@ -158,12 +160,12 @@ export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess, onError }: Vl
                         <AdminStateSelector value={formState} onChange={setFormState} />
 
                         <div className="space-y-3">
-                            <Label className="text-zinc-500 font-mono text-xs uppercase">IPv4 Address (CIDR)</Label>
+                            <Label className="text-zinc-500 font-mono text-xs uppercase">{t('vlan_drawer.ipv4')}</Label>
                             <Input value={formIp} onChange={(e) => setFormIp(e.target.value)} className="bg-zinc-950 border-zinc-800 text-emerald-400 font-mono h-11 focus-visible:ring-emerald-500/50" placeholder="e.g. 10.21.0.1/24" />
                         </div>
 
                         <ResourceSelector
-                            label="Security Zone"
+                            label={t('vlan_drawer.sec_zone')}
                             value={formZone}
                             onChange={setFormZone}
                             options={dynamicZoneOptions}
@@ -172,9 +174,9 @@ export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess, onError }: Vl
 
                         {isEditMode && (
                             <div className="space-y-3 border-t border-zinc-800 pt-6">
-                                <Label className="text-zinc-500 font-mono text-xs uppercase tracking-wider">Services</Label>
+                                <Label className="text-zinc-500 font-mono text-xs uppercase tracking-wider">{t('vlan_drawer.services')}</Label>
                                 <Button variant="outline" onClick={() => setIsDhcpModalOpen(true)} className="w-full h-11 bg-zinc-950 border-zinc-700 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 font-mono">
-                                    <Server className="w-4 h-4 mr-2" /> Configure DHCP Server
+                                    <Server className="w-4 h-4 mr-2" /> {t('vlan_drawer.config_dhcp')}
                                 </Button>
                             </div>
                         )}
@@ -183,8 +185,8 @@ export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess, onError }: Vl
                     </div>
 
                     <div className="p-6 border-t border-zinc-800 bg-zinc-950/50 flex justify-end gap-3">
-                        <Button variant="outline" onClick={onClose} className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 font-mono uppercase text-xs">Cancel</Button>
-                        <Button onClick={handleSave} disabled={isLoading} className="bg-emerald-600 hover:bg-emerald-500 text-white font-mono uppercase text-xs"><Save className="w-4 h-4 mr-2" /> {isLoading ? 'COMMITTING...' : 'APPLY CHANGES'}</Button>
+                        <Button variant="outline" onClick={onClose} className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 font-mono uppercase text-xs">{t('vlan_drawer.cancel')}</Button>
+                        <Button onClick={handleSave} disabled={isLoading} className="bg-emerald-600 hover:bg-emerald-500 text-white font-mono uppercase text-xs"><Save className="w-4 h-4 mr-2" /> {isLoading ? t('vlan_drawer.committing') : t('vlan_drawer.apply')}</Button>
                     </div>
                 </SheetContent>
             </Sheet>
@@ -192,7 +194,7 @@ export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess, onError }: Vl
             <AlertModal
                 isOpen={localAlert.isOpen}
                 type="error"
-                title="Validation Error"
+                title={t('vlan_drawer.val_error')}
                 message={localAlert.msg}
                 onCancel={() => setLocalAlert({ isOpen: false, msg: '' })}
             />

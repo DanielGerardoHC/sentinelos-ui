@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { NetworkInterface, useInterfaces } from '@/hooks/useInterfaces';
 import { useZones } from '@/hooks/useZones';
 
@@ -15,7 +16,6 @@ import { ManagementSelector } from './ManagementSelector';
 import { DhcpDrawer } from './DhcpDrawer';
 import dynamic from 'next/dynamic';
 
-// Importación dinámica para romper la dependencia circular
 const ZoneEditDrawer = dynamic(
     () => import('./ZoneEditDrawer').then((mod) => mod.ZoneEditDrawer),
     { ssr: false }
@@ -29,7 +29,9 @@ interface InterfaceEditDrawerProps {
     onError?: (msg: string) => void;
 }
 
-export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess, onError }: InterfaceEditDrawerProps) {    const { updateInterface, isLoading, error } = useInterfaces();
+export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess, onError }: InterfaceEditDrawerProps) {
+    const { t } = useTranslation();
+    const { updateInterface, isLoading, error } = useInterfaces();
     const { zones, fetchZones } = useZones();
 
     const [formIp, setFormIp] = useState('');
@@ -86,10 +88,10 @@ export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess, onError
                         <SheetHeader>
                             <SheetTitle className="text-zinc-100 font-mono text-2xl flex items-center gap-3">
                                 <Activity className="w-5 h-5 text-emerald-500" />
-                                Edit Interface: {iface?.name}
+                                {t('iface_drawer.edit_title', { name: iface?.name })}
                             </SheetTitle>
                             <SheetDescription className="text-zinc-400 font-mono text-xs">
-                                Configure physical interface parameters directly.
+                                {t('iface_drawer.drawer_desc')}
                             </SheetDescription>
                         </SheetHeader>
                     </div>
@@ -98,16 +100,16 @@ export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess, onError
                         <AdminStateSelector value={formState} onChange={setFormState} />
 
                         <div className="space-y-3">
-                            <Label className="text-zinc-500 font-mono text-xs uppercase">IPv4 Address (CIDR)</Label>
-                            <Input value={formIp} onChange={(e) => setFormIp(e.target.value)} className="bg-zinc-950 border-zinc-800 text-emerald-400 font-mono h-11 focus-visible:ring-emerald-500/50" placeholder="e.g. 192.168.1.1/24" />
+                            <Label className="text-zinc-500 font-mono text-xs uppercase">{t('iface_drawer.ipv4')}</Label>
+                            <Input value={formIp} onChange={(e) => setFormIp(e.target.value)} className="bg-zinc-950 border-zinc-800 text-emerald-400 font-mono h-11 focus-visible:ring-emerald-500/50" placeholder={t('iface_drawer.ipv4_placeholder')} />
                         </div>
 
-                        <ResourceSelector label="Security Zone" value={formZone} onChange={setFormZone} options={zoneOptions} onEditClick={() => setIsZoneDrawerOpen(true)} />
+                        <ResourceSelector label={t('iface_drawer.sec_zone')} value={formZone} onChange={setFormZone} options={zoneOptions} onEditClick={() => setIsZoneDrawerOpen(true)} />
 
                         <div className="space-y-3 border-t border-zinc-800 pt-6">
-                            <Label className="text-zinc-500 font-mono text-xs uppercase tracking-wider">Services</Label>
+                            <Label className="text-zinc-500 font-mono text-xs uppercase tracking-wider">{t('iface_drawer.services')}</Label>
                             <Button variant="outline" onClick={() => setIsDhcpModalOpen(true)} className="w-full h-11 bg-zinc-950 border-zinc-700 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 font-mono">
-                                <Server className="w-4 h-4 mr-2" /> Configure DHCP Server
+                                <Server className="w-4 h-4 mr-2" /> {t('iface_drawer.config_dhcp')}
                             </Button>
                         </div>
 
@@ -115,9 +117,9 @@ export function InterfaceEditDrawer({ isOpen, onClose, iface, onSuccess, onError
                     </div>
 
                     <div className="p-6 border-t border-zinc-800 bg-zinc-950/50 flex justify-end gap-3">
-                        <Button variant="outline" onClick={onClose} className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 font-mono text-xs uppercase">Back</Button>
+                        <Button variant="outline" onClick={onClose} className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 font-mono text-xs uppercase">{t('iface_drawer.back')}</Button>
                         <Button onClick={handleSave} disabled={isLoading} className="bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs uppercase">
-                            <Save className="w-4 h-4 mr-2" /> {isLoading ? 'SAVING...' : 'APPLY CHANGES'}
+                            <Save className="w-4 h-4 mr-2" /> {isLoading ? t('iface_drawer.saving') : t('iface_drawer.apply')}
                         </Button>
                     </div>
                 </SheetContent>

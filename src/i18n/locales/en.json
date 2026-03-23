@@ -1,4 +1,69 @@
 {
+  "dhcp_drawer": {
+    "title": "DHCP Server: {{interface}}",
+    "desc": "Configure automatic IP assignment pool for this network.",
+    "enable_dhcp": "Enable DHCP Server",
+    "start_ip": "Range Start IP",
+    "end_ip": "Range End IP",
+    "gateway": "Default Gateway",
+    "lease_time": "Lease Time (Minutes)",
+    "dns1": "Primary DNS",
+    "dns2": "Secondary DNS",
+    "cancel": "Cancel",
+    "save": "SAVE SETTINGS"
+  },
+  "admin_state": {
+    "title": "Administrative Status",
+    "up": "UP",
+    "down": "DOWN"
+  },
+  "iface_drawer": {
+    "edit_title": "Edit Interface: {{name}}",
+    "drawer_desc": "Configure physical interface parameters directly.",
+    "ipv4": "IPv4 Address (CIDR)",
+    "ipv4_placeholder": "e.g. 192.168.1.1/24",
+    "sec_zone": "Security Zone",
+    "services": "Services",
+    "config_dhcp": "Configure DHCP Server",
+    "back": "BACK",
+    "saving": "SAVING...",
+    "apply": "APPLY CHANGES"
+  },
+  "route_drawer": {
+    "edit_route": "Edit Static Route",
+    "create_route": "Create Static Route",
+    "drawer_desc": "Configure next-hop routing and path metrics.",
+    "dest_network": "Destination Network (CIDR)",
+    "dest_placeholder": "e.g. 0.0.0.0/0 (Default Route) or 10.50.0.0/24",
+    "next_hop": "Next-Hop Gateway",
+    "admin_dist": "Administrative Distance",
+    "egress_iface": "Egress Interface",
+    "desc_optional": "Description (Optional)",
+    "desc_placeholder": "e.g. Route to Branch Office",
+    "cancel": "CANCEL",
+    "committing": "COMMITTING...",
+    "apply": "APPLY CHANGES",
+    "val_error": "Validation Error",
+    "dest_req": "Destination network is required to save the route."
+  },
+  "vlan_drawer": {
+    "req_fields": "VLAN ID and Parent Interface are required.",
+    "invalid_parent": "Cannot use {{parent}} as parent. It has an IP assigned (Layer 3 active). Remove its IP first.",
+    "l3_active": "(L3 Active - Invalid)",
+    "l2_ready": "(L2 Ready)",
+    "edit_vlan": "Edit VLAN {{id}}",
+    "create_vlan": "Create New VLAN",
+    "vlan_id": "VLAN ID (Tag)",
+    "parent_iface": "Parent Interface",
+    "ipv4": "IPv4 Address (CIDR)",
+    "sec_zone": "Security Zone",
+    "services": "Services",
+    "config_dhcp": "Configure DHCP Server",
+    "cancel": "CANCEL",
+    "committing": "COMMITTING...",
+    "apply": "APPLY CHANGES",
+    "val_error": "Validation Error"
+  },
   "routing": {
     "title": "Static Routing",
     "desc": "Manage global routing table and next-hop metrics.",
@@ -61,6 +126,8 @@
     "config_error": "Configuration Error"
   },
   "zones": {
+    "type_change_title": "Change Zone Type?",
+    "type_change_confirm": "YES, PROCEED",
     "page_title": "Security Zones",
     "page_desc": "Logical isolation and grouping of network interfaces.",
     "page_add_btn": "ADD ZONE",

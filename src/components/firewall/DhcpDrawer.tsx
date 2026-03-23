@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDhcp } from '@/hooks/useDhcp';
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Server, Save, Loader2, ShieldAlert } from "lucide-react";
+import { Server, Loader2, ShieldAlert } from "lucide-react";
 
 interface DhcpDrawerProps {
     isOpen: boolean;
@@ -15,6 +16,7 @@ interface DhcpDrawerProps {
 }
 
 export function DhcpDrawer({ isOpen, onClose, interfaceName, onSuccess }: DhcpDrawerProps) {
+    const { t } = useTranslation();
     const { dhcpPools, fetchDhcpPools, saveDhcp, deleteDhcp, isLoading, error } = useDhcp();
 
     const [dhcpEnabled, setDhcpEnabled] = useState(false);
@@ -52,7 +54,7 @@ export function DhcpDrawer({ isOpen, onClose, interfaceName, onSuccess }: DhcpDr
                 }
             });
         }
-    }, [isOpen, interfaceName]);
+    }, [isOpen, interfaceName, fetchDhcpPools, dhcpPools]);
 
     const handleSave = async () => {
         if (!dhcpEnabled) {
@@ -95,10 +97,10 @@ export function DhcpDrawer({ isOpen, onClose, interfaceName, onSuccess }: DhcpDr
                     <SheetHeader>
                         <SheetTitle className="text-zinc-100 font-mono text-xl flex items-center gap-3">
                             <Server className="w-5 h-5 text-emerald-500" />
-                            DHCP Server: {interfaceName}
+                            {t('dhcp_drawer.title', { interface: interfaceName })}
                         </SheetTitle>
                         <SheetDescription className="text-zinc-400 font-mono text-xs">
-                            Configure automatic IP assignment pool for this network.
+                            {t('dhcp_drawer.desc')}
                         </SheetDescription>
                     </SheetHeader>
                 </div>
@@ -119,40 +121,40 @@ export function DhcpDrawer({ isOpen, onClose, interfaceName, onSuccess }: DhcpDr
                             className="w-5 h-5 accent-emerald-500 bg-zinc-950 border-zinc-700"
                         />
                         <span className="font-mono text-sm text-emerald-400 font-bold uppercase tracking-wider">
-                            Enable DHCP Server
+                            {t('dhcp_drawer.enable_dhcp')}
                         </span>
                     </label>
 
                     <div className={`space-y-6 transition-opacity duration-300 ${dhcpEnabled ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-3">
-                                <Label className="text-zinc-500 font-mono text-xs uppercase">Range Start IP</Label>
+                                <Label className="text-zinc-500 font-mono text-xs uppercase">{t('dhcp_drawer.start_ip')}</Label>
                                 <Input value={startIp} onChange={e => setStartIp(e.target.value)} className="bg-zinc-950 border-zinc-800 font-mono text-emerald-400 h-11 focus-visible:ring-emerald-500/50" placeholder="e.g. 10.0.0.100" />
                             </div>
                             <div className="space-y-3">
-                                <Label className="text-zinc-500 font-mono text-xs uppercase">Range End IP</Label>
+                                <Label className="text-zinc-500 font-mono text-xs uppercase">{t('dhcp_drawer.end_ip')}</Label>
                                 <Input value={endIp} onChange={e => setEndIp(e.target.value)} className="bg-zinc-950 border-zinc-800 font-mono text-emerald-400 h-11 focus-visible:ring-emerald-500/50" placeholder="e.g. 10.0.0.200" />
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-3">
-                                <Label className="text-zinc-500 font-mono text-xs uppercase">Default Gateway</Label>
+                                <Label className="text-zinc-500 font-mono text-xs uppercase">{t('dhcp_drawer.gateway')}</Label>
                                 <Input value={gateway} onChange={e => setGateway(e.target.value)} className="bg-zinc-950 border-zinc-800 font-mono text-emerald-400 h-11 focus-visible:ring-emerald-500/50" placeholder="e.g. 10.0.0.1" />
                             </div>
                             <div className="space-y-3">
-                                <Label className="text-zinc-500 font-mono text-xs uppercase">Lease Time (Minutes)</Label>
+                                <Label className="text-zinc-500 font-mono text-xs uppercase">{t('dhcp_drawer.lease_time')}</Label>
                                 <Input type="number" value={leaseTime} onChange={e => setLeaseTime(Number(e.target.value))} className="bg-zinc-950 border-zinc-800 font-mono text-emerald-400 h-11 focus-visible:ring-emerald-500/50" placeholder="1440" />
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-3">
-                                <Label className="text-zinc-500 font-mono text-xs uppercase">Primary DNS</Label>
+                                <Label className="text-zinc-500 font-mono text-xs uppercase">{t('dhcp_drawer.dns1')}</Label>
                                 <Input value={dns1} onChange={e => setDns1(e.target.value)} className="bg-zinc-950 border-zinc-800 font-mono text-emerald-400 h-11 focus-visible:ring-emerald-500/50" placeholder="8.8.8.8" />
                             </div>
                             <div className="space-y-3">
-                                <Label className="text-zinc-500 font-mono text-xs uppercase">Secondary DNS</Label>
+                                <Label className="text-zinc-500 font-mono text-xs uppercase">{t('dhcp_drawer.dns2')}</Label>
                                 <Input value={dns2} onChange={e => setDns2(e.target.value)} className="bg-zinc-950 border-zinc-800 font-mono text-emerald-400 h-11 focus-visible:ring-emerald-500/50" placeholder="1.1.1.1" />
                             </div>
                         </div>
@@ -161,10 +163,10 @@ export function DhcpDrawer({ isOpen, onClose, interfaceName, onSuccess }: DhcpDr
 
                 <div className="p-6 border-t border-zinc-800 bg-zinc-950/50 flex justify-end gap-3">
                     <Button variant="outline" onClick={onClose} className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 font-mono uppercase text-xs">
-                        Cancel
+                        {t('dhcp_drawer.cancel')}
                     </Button>
                     <Button onClick={handleSave} disabled={isLoading} className="bg-emerald-600 hover:bg-emerald-500 text-white font-mono uppercase text-xs w-36">
-                        {isLoading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'SAVE SETTINGS'}
+                        {isLoading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : t('dhcp_drawer.save')}
                     </Button>
                 </div>
             </SheetContent>
