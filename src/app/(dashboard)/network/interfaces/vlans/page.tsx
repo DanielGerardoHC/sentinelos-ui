@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useVlans, VlanInterface } from '@/hooks/useVlans';
+import { useZones } from '@/hooks/useZones';
 
 import { PageHeader } from '@/components/firewall/PageHeader';
 import { StatusBadge, ZoneBadge } from '@/components/firewall/FirewallBadges';
@@ -14,12 +16,13 @@ import { Button } from "@/components/ui/button";
 import { Edit2, Trash2, Activity } from "lucide-react";
 
 export default function VlansPage() {
-    const { vlans, fetchVlans, deleteVlan, isLoading, error: fetchError } = useVlans();
+    const { t } = useTranslation();
+    const { vlans, fetchVlans, deleteVlan, isLoading: isLoadingVlans, error: fetchError } = useVlans();
+    const { zones, fetchZones } = useZones();
 
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedVlan, setSelectedVlan] = useState<VlanInterface | null>(null);
 
-    // Estados para alertas
     const [backendError, setBackendError] = useState('');
     const [deleteConfirm, setDeleteConfirm] = useState<{isOpen: boolean, vlanName: string}>({
         isOpen: false, vlanName: ''
@@ -27,7 +30,8 @@ export default function VlansPage() {
 
     useEffect(() => {
         fetchVlans();
-    }, [fetchVlans]);
+        fetchZones();
+    }, [fetchVlans, fetchZones]);
 
     const handleAddClick = () => {
         setBackendError('');
@@ -48,14 +52,24 @@ export default function VlansPage() {
 
     const confirmDelete = async () => {
         const success = await deleteVlan(deleteConfirm.vlanName);
-        if (!success) setBackendError("Failed to delete VLAN from backend.");
+        if (!success) setBackendError(t('vlans.delete_fail'));
         setDeleteConfirm({ isOpen: false, vlanName: '' });
     };
 
+    const getZoneColor = (zoneName?: string) => {
+        if (!zoneName) return 'zinc';
+        const found = zones.find(z => z.name.toLowerCase() === zoneName.toLowerCase());
+        return found?.color || 'zinc';
+    };
+
     const tableColumns = [
-        { label: "Interface", className: "w-[150px]" }, { label: "Parent", className: "w-[150px]" },
-        { label: "State", className: "w-[120px]" }, { label: "IP / Netmask" },
-        { label: "Zone" }, { label: "Management" }, { label: "Actions", className: "text-right" }
+        { label: t('vlans.col_interface'), className: "w-[150px]" },
+        { label: t('vlans.col_parent'), className: "w-[150px]" },
+        { label: t('vlans.col_state'), className: "w-[120px]" },
+        { label: t('vlans.col_ip') },
+        { label: t('vlans.col_zone') },
+        { label: t('vlans.col_mgmt') },
+        { label: t('vlans.col_actions'), className: "text-right" }
     ];
 
     const displayError = backendError || fetchError;
@@ -63,18 +77,21 @@ export default function VlansPage() {
     return (
         <div className="space-y-6 relative overflow-hidden">
             <PageHeader
-                title="Virtual LANs (802.1Q)"
-                description="Create and manage VLAN sub-interfaces."
-                isLoading={isLoading}
-                onRefresh={fetchVlans}
+                title={t('vlans.title')}
+                description={t('vlans.desc')}
+                isLoading={isLoadingVlans}
+                onRefresh={() => {
+                    fetchVlans();
+                    fetchZones();
+                }}
                 onAdd={handleAddClick}
-                addText="+ Add VLAN"
+                addText={t('vlans.add_btn')}
             />
 
             <AlertModal
                 isOpen={!!displayError}
                 type="error"
-                title="Configuration Error"
+                title={t('vlans.config_error')}
                 message={displayError}
                 onCancel={() => setBackendError('')}
             />
@@ -82,15 +99,15 @@ export default function VlansPage() {
             <AlertModal
                 isOpen={deleteConfirm.isOpen}
                 type="confirm"
-                title="Delete VLAN?"
-                message={`Are you sure you want to delete VLAN ${deleteConfirm.vlanName}? This will instantly remove the interface and drop all active connections.`}
-                confirmText="YES, DELETE"
-                isLoading={isLoading}
+                title={t('vlans.delete_title')}
+                message={t('vlans.delete_msg', { name: deleteConfirm.vlanName })}
+                confirmText={t('vlans.delete_confirm')}
+                isLoading={isLoadingVlans}
                 onConfirm={confirmDelete}
                 onCancel={() => setDeleteConfirm({ isOpen: false, vlanName: '' })}
             />
 
-            <FirewallTable columns={tableColumns} isEmpty={vlans.length === 0} isLoading={isLoading} emptyMessage="No VLANs found.">
+            <FirewallTable columns={tableColumns} isEmpty={vlans.length === 0} isLoading={isLoadingVlans} emptyMessage={t('vlans.empty_msg')}>
                 {vlans.map((vlan) => (
                     <TableRow key={vlan.name} className="border-b border-zinc-800/50 hover:bg-zinc-900/50 transition-colors group">
                         <TableCell className="font-mono font-medium text-emerald-400">
@@ -101,8 +118,12 @@ export default function VlansPage() {
                         </TableCell>
                         <TableCell className="font-mono text-zinc-400">{vlan.parent}</TableCell>
                         <TableCell><StatusBadge state={vlan.state} /></TableCell>
-                        <TableCell className="font-mono text-sm text-zinc-300">{vlan.ip || <span className="text-zinc-600 italic text-xs">Unassigned</span>}</TableCell>
-                        <TableCell><ZoneBadge zone={vlan.zone} /></TableCell>
+                        <TableCell className="font-mono text-sm text-zinc-300">
+                            {vlan.ip || <span className="text-zinc-600 italic text-xs">{t('vlans.unassigned')}</span>}
+                        </TableCell>
+                        <TableCell>
+                            <ZoneBadge zone={vlan.zone} color={getZoneColor(vlan.zone)} />
+                        </TableCell>
                         <TableCell>
                             <div className="flex gap-1">
                                 {vlan.management?.map(mgt => (
@@ -137,7 +158,7 @@ export default function VlansPage() {
                     vlan={selectedVlan}
                     onSuccess={fetchVlans}
                     onError={(msg) => {
-                        setIsDrawerOpen(false); // Cerramos el cajón para que la alerta gigante se luzca
+                        setIsDrawerOpen(false);
                         setBackendError(msg);
                     }}
                 />
