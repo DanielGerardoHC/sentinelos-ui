@@ -1,4 +1,25 @@
 {
+  "zones": {
+    "edit_zone": "Editar Zona:",
+    "create_zone": "Crear Zona de Seguridad",
+    "drawer_desc": "Agrupa interfaces y aplica aislamiento lógico.",
+    "zone_name": "Nombre de la Zona",
+    "op_mode": "Modo de Operación",
+    "l3_routed": "Capa 3 (Enrutado)",
+    "l2_switched": "Capa 2 (Conmutado)",
+    "visual_id": "Identidad Visual (Token)",
+    "assigned_ifaces": "Interfaces Asignadas",
+    "l3_filter": "FILTRO L3",
+    "no_ifaces": "Ninguna interfaz asignada",
+    "add_iface": "Añadir interfaz...",
+    "networks_cidr": "Redes Permitidas (CIDR)",
+    "cancel": "CANCELAR",
+    "saving": "GUARDANDO...",
+    "apply": "APLICAR",
+    "val_error": "Error de Validación",
+    "name_req": "El nombre de la zona es obligatorio.",
+    "type_warn": "Cambiar el tipo de zona borrará las interfaces asignadas. ¿Proceder?"
+  },
   "mgmt": {
     "title": "Gestión del Sistema",
     "desc": "Configuración de plataforma, identidad y localización.",

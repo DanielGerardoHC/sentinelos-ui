@@ -1,4 +1,25 @@
 {
+  "zones": {
+    "edit_zone": "Edit Zone:",
+    "create_zone": "Create Security Zone",
+    "drawer_desc": "Group interfaces and apply logical isolation.",
+    "zone_name": "Zone Name",
+    "op_mode": "Operation Mode",
+    "l3_routed": "Layer 3 (Routed)",
+    "l2_switched": "Layer 2 (Switched)",
+    "visual_id": "Visual Identity (Token)",
+    "assigned_ifaces": "Assigned Interfaces",
+    "l3_filter": "L3 FILTER",
+    "no_ifaces": "No interfaces assigned",
+    "add_iface": "Add interface...",
+    "networks_cidr": "Permitted Networks (CIDR)",
+    "cancel": "CANCEL",
+    "saving": "SAVING...",
+    "apply": "APPLY",
+    "val_error": "Validation Error",
+    "name_req": "Zone name is required.",
+    "type_warn": "Changing zone type will clear assigned interfaces. Proceed?"
+  },
   "mgmt": {
     "title": "System Management",
     "desc": "Platform configuration, identity, and localization.",
