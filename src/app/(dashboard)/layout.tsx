@@ -85,7 +85,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     items={[
                         { label: t('nav.system', 'System'), href: '/system' },
                         { label: t('nav.network', 'Network'), href: '/network/interfaces' },
-                        { label: t('nav.policies', 'Policies'), href: '/policies' },
+                        { label: t('nav.policies', 'Policies'), href: '/policies/rules' },
                         { label: t('nav.monitor', 'Monitor'), href: '/monitor' },
                         { label: t('nav.objects', 'Objects'), href: '/objects/zones' }
                     ]}
