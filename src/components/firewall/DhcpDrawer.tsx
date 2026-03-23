@@ -21,6 +21,7 @@ export function DhcpDrawer({ isOpen, onClose, interfaceName, onSuccess }: DhcpDr
 
     const [dhcpEnabled, setDhcpEnabled] = useState(false);
     const [existsInApi, setExistsInApi] = useState(false);
+    const [isInitialized, setIsInitialized] = useState(false); // <--- NUESTRO ESCUDO ANTI-BUCLES
 
     const [startIp, setStartIp] = useState('');
     const [endIp, setEndIp] = useState('');
@@ -29,32 +30,41 @@ export function DhcpDrawer({ isOpen, onClose, interfaceName, onSuccess }: DhcpDr
     const [dns2, setDns2] = useState('1.1.1.1');
     const [leaseTime, setLeaseTime] = useState(1440);
 
+    // 1. Al abrir el drawer, pedimos los datos UNA SOLA VEZ
     useEffect(() => {
         if (isOpen && interfaceName) {
-            fetchDhcpPools().then(() => {
-                const existingConfig = dhcpPools.find(d => d.interface === interfaceName);
-                if (existingConfig) {
-                    setExistsInApi(true);
-                    setDhcpEnabled(true);
-                    setStartIp(existingConfig.start_ip || '');
-                    setEndIp(existingConfig.end_ip || '');
-                    setGateway(existingConfig.gateway || '');
-                    setDns1(existingConfig.dns?.[0] || '8.8.8.8');
-                    setDns2(existingConfig.dns?.[1] || '');
-                    setLeaseTime(existingConfig.lease_time || 1440);
-                } else {
-                    setExistsInApi(false);
-                    setDhcpEnabled(false);
-                    setStartIp('');
-                    setEndIp('');
-                    setGateway('');
-                    setDns1('8.8.8.8');
-                    setDns2('');
-                    setLeaseTime(1440);
-                }
-            });
+            setIsInitialized(false);
+            fetchDhcpPools();
         }
-    }, [isOpen, interfaceName, fetchDhcpPools, dhcpPools]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen, interfaceName]);
+
+    // 2. Poblamos el formulario SOLO cuando la API responde y no lo hemos inicializado aún
+    useEffect(() => {
+        if (isOpen && interfaceName && !isLoading && !isInitialized && dhcpPools) {
+            const existingConfig = dhcpPools.find(d => d.interface === interfaceName);
+            if (existingConfig) {
+                setExistsInApi(true);
+                setDhcpEnabled(true);
+                setStartIp(existingConfig.start_ip || '');
+                setEndIp(existingConfig.end_ip || '');
+                setGateway(existingConfig.gateway || '');
+                setDns1(existingConfig.dns?.[0] || '8.8.8.8');
+                setDns2(existingConfig.dns?.[1] || '');
+                setLeaseTime(existingConfig.lease_time || 1440);
+            } else {
+                setExistsInApi(false);
+                setDhcpEnabled(false);
+                setStartIp('');
+                setEndIp('');
+                setGateway('');
+                setDns1('8.8.8.8');
+                setDns2('');
+                setLeaseTime(1440);
+            }
+            setIsInitialized(true); // Sellamos el formulario para evitar bucles si haces clic en algo
+        }
+    }, [isOpen, interfaceName, isLoading, dhcpPools, isInitialized]);
 
     const handleSave = async () => {
         if (!dhcpEnabled) {
