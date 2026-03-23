@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useZones, Zone } from '@/hooks/useZones';
 
 import { PageHeader } from '@/components/firewall/PageHeader';
@@ -22,6 +23,7 @@ const ColorMap: Record<string, string> = {
 };
 
 export default function ZonesPage() {
+    const { t } = useTranslation();
     const { zones, fetchZones, deleteZone, isLoading, error: fetchError } = useZones();
 
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -53,16 +55,16 @@ export default function ZonesPage() {
 
     const confirmDelete = async () => {
         const success = await deleteZone(deleteConfirm.name);
-        if (!success) setBackendError("Failed to delete zone from backend.");
+        if (!success) setBackendError(t('zones.delete_fail'));
         setDeleteConfirm({ isOpen: false, name: '' });
     };
 
     const tableColumns = [
-        { label: "Zone Name", className: "w-[200px]" },
-        { label: "Type", className: "w-[120px]" },
-        { label: "Interfaces" },
-        { label: "Subnets" },
-        { label: "Actions", className: "text-right" }
+        { label: t('zones.col_name'), className: "w-[200px]" },
+        { label: t('zones.col_type'), className: "w-[120px]" },
+        { label: t('zones.col_interfaces') },
+        { label: t('zones.col_subnets') },
+        { label: t('zones.col_actions'), className: "text-right" }
     ];
 
     const displayError = backendError || fetchError;
@@ -70,18 +72,18 @@ export default function ZonesPage() {
     return (
         <div className="space-y-6 relative overflow-hidden">
             <PageHeader
-                title="Security Zones"
-                description="Logical isolation and grouping of network interfaces."
+                title={t('zones.page_title')}
+                description={t('zones.page_desc')}
                 isLoading={isLoading}
                 onRefresh={fetchZones}
                 onAdd={handleAddClick}
-                addText="+ Add Zone"
+                addText={t('zones.page_add_btn')}
             />
 
             <AlertModal
                 isOpen={!!displayError}
                 type="error"
-                title="Configuration Error"
+                title={t('zones.config_error')}
                 message={displayError}
                 onCancel={() => setBackendError('')}
             />
@@ -89,15 +91,15 @@ export default function ZonesPage() {
             <AlertModal
                 isOpen={deleteConfirm.isOpen}
                 type="confirm"
-                title="Delete Zone?"
-                message={`Are you sure you want to delete the zone '${deleteConfirm.name.toUpperCase()}'? This will remove all associated interface bindings.`}
-                confirmText="YES, DELETE"
+                title={t('zones.delete_title')}
+                message={t('zones.delete_msg', { name: deleteConfirm.name.toUpperCase() })}
+                confirmText={t('zones.delete_confirm')}
                 isLoading={isLoading}
                 onConfirm={confirmDelete}
                 onCancel={() => setDeleteConfirm({ isOpen: false, name: '' })}
             />
 
-            <FirewallTable columns={tableColumns} isEmpty={zones.length === 0} isLoading={isLoading} emptyMessage="No zones configured.">
+            <FirewallTable columns={tableColumns} isEmpty={zones.length === 0} isLoading={isLoading} emptyMessage={t('zones.empty_msg')}>
                 {zones.map((zone) => {
                     const colorClasses = ColorMap[zone.color || 'zinc'];
 
@@ -111,7 +113,7 @@ export default function ZonesPage() {
                             </TableCell>
 
                             <TableCell className="font-mono text-zinc-400 uppercase text-xs">
-                                {zone.type === 'l3' ? 'Layer 3' : 'Layer 2'}
+                                {zone.type === 'l3' ? t('zones.layer3') : t('zones.layer2')}
                             </TableCell>
 
                             <TableCell>
@@ -120,20 +122,20 @@ export default function ZonesPage() {
                                         <span key={i} className="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-mono text-[10px]">
                                             <Network className="w-3 h-3 inline-block mr-1 opacity-50" /> {i}
                                         </span>
-                                    )) : <span className="text-zinc-600 text-xs italic">Empty</span>}
+                                    )) : <span className="text-zinc-600 text-xs italic">{t('zones.empty_ifaces')}</span>}
                                 </div>
                             </TableCell>
 
                             <TableCell className="font-mono text-zinc-500 text-xs truncate max-w-[200px]">
-                                {zone.networks?.length ? zone.networks.join(', ') : 'Any'}
+                                {zone.networks?.length ? zone.networks.join(', ') : t('zones.any_subnet')}
                             </TableCell>
 
                             <TableCell className="text-right">
                                 <div className="flex justify-end gap-1 opacity-50 group-hover:opacity-100 transition-all">
-                                    <Button variant="outline" size="icon" onClick={() => handleEditClick(zone)} className="h-8 w-8 bg-transparent border-transparent text-zinc-400 hover:text-emerald-400">
+                                    <Button variant="outline" size="icon" onClick={() => handleEditClick(zone)} className="h-8 w-8 bg-transparent border-transparent text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/50 transition-colors">
                                         <Edit2 className="w-4 h-4" />
                                     </Button>
-                                    <Button variant="outline" size="icon" onClick={() => initiateDelete(zone.name)} className="h-8 w-8 bg-transparent border-transparent text-zinc-400 hover:text-red-400">
+                                    <Button variant="outline" size="icon" onClick={() => initiateDelete(zone.name)} className="h-8 w-8 bg-transparent border-transparent text-zinc-400 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/50 transition-colors">
                                         <Trash2 className="w-4 h-4" />
                                     </Button>
                                 </div>
