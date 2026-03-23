@@ -11,12 +11,23 @@ export function StatusBadge({ state }: { state: string }) {
     );
 }
 
-export function ZoneBadge({ zone }: { zone: string }) {
-    const isTrust = zone === 'trust';
+export function ZoneBadge({ zone, color = 'zinc' }: { zone?: string; color?: string }) {
+    if (!zone) return <span className="text-zinc-600 italic font-mono text-xs">-</span>;
+
+    const colors: Record<string, string> = {
+        emerald: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10',
+        red: 'text-red-400 border-red-500/30 bg-red-500/10',
+        amber: 'text-amber-400 border-amber-500/30 bg-amber-500/10',
+        blue: 'text-blue-400 border-blue-500/30 bg-blue-500/10',
+        purple: 'text-purple-400 border-purple-500/30 bg-purple-500/10',
+        zinc: 'text-zinc-400 border-zinc-500/30 bg-zinc-500/10',
+    };
+
+    const style = colors[color] || colors.zinc;
+
     return (
-        <Badge variant="outline" className={`font-mono text-[10px] uppercase px-2 py-0.5 ${isTrust ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10' : 'border-orange-500/30 text-orange-400 bg-orange-500/10'}`}>
-            {isTrust ? <Shield className="w-3 h-3 mr-1.5" /> : <ShieldAlert className="w-3 h-3 mr-1.5" />}
+        <span className={`px-2 py-0.5 rounded border font-mono text-xs tracking-wide uppercase ${style}`}>
             {zone}
-        </Badge>
+        </span>
     );
 }

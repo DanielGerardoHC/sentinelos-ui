@@ -1,4 +1,18 @@
 {
+  "interfaces": {
+    "title": "Network Interfaces",
+    "desc": "Manage physical and virtual interfaces, IP assignments, and security zones.",
+    "add_btn": "ADD INTERFACE",
+    "col_interface": "Interface",
+    "col_state": "State",
+    "col_ip": "IP / Netmask",
+    "col_zone": "Zone",
+    "col_mgmt": "Management",
+    "col_actions": "Actions",
+    "unassigned": "Unassigned",
+    "empty_msg": "No interfaces found.",
+    "config_error": "Configuration Error"
+  },
   "zones": {
     "edit_zone": "Edit Zone:",
     "create_zone": "Create Security Zone",
@@ -52,7 +66,11 @@
       "interfaces": "Interfaces",
       "vlans_sub": "Vlans",
       "routing": "Routing",
-      "vlans_vxlan": "VLANs & VXLAN"
+      "vlans_vxlan": "VLANs & VXLAN",
+      "vpn": "VPN",
+      "ipsec_vpn": "IPSec",
+      "vxlan": "VXLAN",
+      "ssl_vpn": "SSL VPN"
     },
     "policies": {
       "rules": "Security Rules",

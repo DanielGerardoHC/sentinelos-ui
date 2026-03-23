@@ -1,40 +1,53 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useInterfaces, NetworkInterface } from '@/hooks/useInterfaces';
+import { useZones } from '@/hooks/useZones';
 
 import { PageHeader } from '@/components/firewall/PageHeader';
 import { StatusBadge, ZoneBadge } from '@/components/firewall/FirewallBadges';
 import { FirewallTable } from '@/components/firewall/FirewallTable';
 import { InterfaceEditDrawer } from '@/components/firewall/InterfaceEditDrawer';
-import { AlertModal } from '@/components/firewall/AlertModal'; // <-- IMPORTAMOS ALERTA
+import { AlertModal } from '@/components/firewall/AlertModal';
 
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit2, Activity } from "lucide-react"; // Quitamos ShieldAlert
+import { Edit2, Activity } from "lucide-react";
 
 export default function InterfacesPage() {
-    const { interfaces, fetchInterfaces, isLoading, error: fetchError } = useInterfaces();
+    const { t } = useTranslation();
+    const { interfaces, fetchInterfaces, isLoading: isLoadingIfaces, error: fetchError } = useInterfaces();
+    const { zones, fetchZones } = useZones();
 
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedIface, setSelectedIface] = useState<NetworkInterface | null>(null);
-
-    // Estado para manejar el error que nos escupa el Drawer
     const [transactionError, setTransactionError] = useState('');
 
     useEffect(() => {
         fetchInterfaces();
-    }, [fetchInterfaces]);
+        fetchZones();
+    }, [fetchInterfaces, fetchZones]);
 
     const handleEditClick = (iface: NetworkInterface) => {
-        setTransactionError(''); // Limpiar errores anteriores
+        setTransactionError('');
         setSelectedIface(iface);
         setIsDrawerOpen(true);
     };
 
+    const getZoneColor = (zoneName?: string) => {
+        if (!zoneName) return 'zinc';
+        const found = zones.find(z => z.name.toLowerCase() === zoneName.toLowerCase());
+        return found?.color || 'zinc';
+    };
+
     const tableColumns = [
-        { label: "Interface", className: "w-[150px]" }, { label: "State", className: "w-[120px]" },
-        { label: "IP / Netmask" }, { label: "Zone" }, { label: "Management" }, { label: "Actions", className: "text-right" }
+        { label: t('interfaces.col_interface'), className: "w-[150px]" },
+        { label: t('interfaces.col_state'), className: "w-[120px]" },
+        { label: t('interfaces.col_ip') },
+        { label: t('interfaces.col_zone') },
+        { label: t('interfaces.col_mgmt') },
+        { label: t('interfaces.col_actions'), className: "text-right" }
     ];
 
     const displayError = transactionError || fetchError;
@@ -42,35 +55,55 @@ export default function InterfacesPage() {
     return (
         <div className="space-y-6 relative overflow-hidden">
             <PageHeader
-                title="Network Interfaces"
-                description="Manage physical and virtual interfaces, IP assignments, and security zones."
-                isLoading={isLoading}
-                onRefresh={fetchInterfaces}
-                onAdd={() => alert("Función no disponible en API.")}
-                addText="+ Add Interface"
+                title={t('interfaces.title')}
+                description={t('interfaces.desc')}
+                isLoading={isLoadingIfaces}
+                onRefresh={() => {
+                    fetchInterfaces();
+                    fetchZones();
+                }}
+                onAdd={() => {}}
+                addText={t('interfaces.add_btn')}
             />
 
-            {/* ALERTA VISUAL TIPO MODAL PARA ERRORES DE BACKEND */}
             <AlertModal
                 isOpen={!!displayError}
                 type="error"
-                title="Configuration Error"
+                title={t('interfaces.config_error')}
                 message={displayError}
-                onCancel={() => {
-                    setTransactionError('');
-                    // No podemos limpiar fetchError aquí porque viene del hook,
-                    // pero el usuario puede darle "Refresh" a la página.
-                }}
+                onCancel={() => setTransactionError('')}
             />
 
-            <FirewallTable columns={tableColumns} isEmpty={interfaces.length === 0} isLoading={isLoading} emptyMessage="No interfaces found.">
+            <FirewallTable
+                columns={tableColumns}
+                isEmpty={interfaces.length === 0}
+                isLoading={isLoadingIfaces}
+                emptyMessage={t('interfaces.empty_msg')}
+            >
                 {interfaces.map((iface) => (
                     <TableRow key={iface.name} className="border-b border-zinc-800/50 hover:bg-zinc-900/50 group">
-                        <TableCell className="font-mono font-medium text-emerald-400"><div className="flex items-center gap-2"><Activity className="w-4 h-4 text-zinc-600 group-hover:text-emerald-500" />{iface.name}</div></TableCell>
+                        <TableCell className="font-mono font-medium text-emerald-400">
+                            <div className="flex items-center gap-2">
+                                <Activity className="w-4 h-4 text-zinc-600 group-hover:text-emerald-500" />
+                                {iface.name}
+                            </div>
+                        </TableCell>
                         <TableCell><StatusBadge state={iface.state} /></TableCell>
-                        <TableCell className="font-mono text-sm text-zinc-300">{iface.ip || <span className="text-zinc-600 italic text-xs">Unassigned</span>}</TableCell>
-                        <TableCell><ZoneBadge zone={iface.zone} /></TableCell>
-                        <TableCell><div className="flex gap-1">{iface.management?.map(mgt => (<span key={mgt} className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 font-mono text-[10px] uppercase tracking-wider">{mgt}</span>))}</div></TableCell>
+                        <TableCell className="font-mono text-sm text-zinc-300">
+                            {iface.ip || <span className="text-zinc-600 italic text-xs">{t('interfaces.unassigned')}</span>}
+                        </TableCell>
+                        <TableCell>
+                            <ZoneBadge zone={iface.zone} color={getZoneColor(iface.zone)} />
+                        </TableCell>
+                        <TableCell>
+                            <div className="flex gap-1">
+                                {iface.management?.map(mgt => (
+                                    <span key={mgt} className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 font-mono text-[10px] uppercase tracking-wider">
+                                        {mgt}
+                                    </span>
+                                ))}
+                            </div>
+                        </TableCell>
                         <TableCell className="text-right">
                             <div className="flex justify-end gap-1 opacity-50 group-hover:opacity-100 transition-all">
                                 <Button
@@ -93,7 +126,7 @@ export default function InterfacesPage() {
                     iface={selectedIface}
                     onSuccess={fetchInterfaces}
                     onError={(msg) => {
-                        setIsDrawerOpen(false); // Cierra el cajón para mostrar la alerta gigante
+                        setIsDrawerOpen(false);
                         setTransactionError(msg);
                     }}
                 />

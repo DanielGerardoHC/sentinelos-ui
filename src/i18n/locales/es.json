@@ -1,4 +1,18 @@
 {
+  "interfaces": {
+    "title": "Interfaces de Red",
+    "desc": "Gestiona interfaces físicas y virtuales, asignaciones IP y zonas de seguridad.",
+    "add_btn": "AÑADIR INTERFAZ",
+    "col_interface": "Interfaz",
+    "col_state": "Estado",
+    "col_ip": "IP / Máscara",
+    "col_zone": "Zona",
+    "col_mgmt": "Administración",
+    "col_actions": "Acciones",
+    "unassigned": "Sin asignar",
+    "empty_msg": "No se encontraron interfaces.",
+    "config_error": "Error de Configuración"
+  },
   "zones": {
     "edit_zone": "Editar Zona:",
     "create_zone": "Crear Zona de Seguridad",

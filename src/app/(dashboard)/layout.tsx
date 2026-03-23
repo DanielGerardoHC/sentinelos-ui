@@ -24,7 +24,13 @@ const sidebarData: Record<string, MenuItem[]> = {
             subItems: [{ key: 'sidebar.network.vlans_sub', fallback: 'Vlans', link: '/network/interfaces/vlans' }]
         },
         { key: 'sidebar.network.routing', fallback: 'Routing', link: '/network/routing' },
-        { key: 'sidebar.network.vlans_vxlan', fallback: 'VLANs & VXLAN', link: '/network/vlans' },
+        {
+            key: 'sidebar.network.vpn', fallback: 'VPN', link: '/network/vlans',
+            subItems: [{ key: 'sidebar.network.ipsec_vpn', fallback: 'IPsec', link: '/network/ipsec' },
+                       { key: 'sidebar.network.ssl_vpn', fallback: 'SSL VPN', link: '/network/ssl' },
+                       { key: 'sidebar.network.vxlan', fallback: 'VXlan', link: '/network/vxlan' },
+            ]
+        },
     ],
     policies: [
         { key: 'sidebar.policies.rules', fallback: 'Security Rules', link: '/policies/rules' },
