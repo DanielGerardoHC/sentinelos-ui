@@ -90,7 +90,7 @@
     "src_addr": "Source Address Object",
     "dst_addr": "Destination Address Object",
     "addr_placeholder": "LAN_NET (Leave empty for ANY)",
-    "services": "Services (Comma separated)",
+    "services": "Services",
     "svc_placeholder": "HTTP, HTTPS (Leave empty for ANY)",
     "action": "Policy Action",
     "action_allow": "ALLOW Traffic",

@@ -90,7 +90,7 @@
     "src_addr": "Objeto de Dirección de Origen",
     "dst_addr": "Objeto de Dirección de Destino",
     "addr_placeholder": "LAN_NET (Vacio para CUALQUIERA)",
-    "services": "Servicios (Separados por coma)",
+    "services": "Servicios",
     "svc_placeholder": "HTTP, HTTPS (Vacio para CUALQUIERA)",
     "action": "Acción de la Política",
     "action_allow": "PERMITIR Tráfico",
