@@ -78,6 +78,10 @@
     "delete_confirm": "SÍ, ELIMINAR"
   },
   "policy_drawer": {
+    "create_new": "+ Nuevo",
+    "any_address": "Cualquiera (0.0.0.0/0)",
+    "select_services": "Seleccionar Servicios",
+    "no_services": "No hay servicios disponibles. Crea uno primero.",
     "edit_title": "Editar Política de Seguridad #{{id}}",
     "create_title": "Crear Política de Seguridad",
     "drawer_desc": "Define reglas de tráfico, coincidencias de origen/destino y acciones.",
