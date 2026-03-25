@@ -78,7 +78,7 @@
     "delete_confirm": "YES, DELETE"
   },
   "policy_drawer": {
-    "create_new": "+ New",
+    "create_new": "New",
     "any_address": "Any (0.0.0.0/0)",
     "select_services": "Select Services",
     "no_services": "No services available. Create one first.",
