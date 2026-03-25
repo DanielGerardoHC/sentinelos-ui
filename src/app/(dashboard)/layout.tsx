@@ -50,7 +50,8 @@ const sidebarData: Record<string, MenuItem[]> = {
     ],
     objects: [
         { key: 'sidebar.objects.zones', fallback: 'Zones', link: '/objects/zones' },
-        { key: 'sidebar.objects.services', fallback: 'Services', link: '/objects/services' }
+        { key: 'sidebar.objects.services', fallback: 'Services', link: '/objects/services' },
+        { key: 'sidebar.objects.addresses', fallback: 'Addresses', link: '/objects/addresses' },
     ]
 };
 

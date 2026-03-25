@@ -1,4 +1,31 @@
 {
+  "addresses": {
+    "title": "Address Objects",
+    "desc": "Define reusable IP and CIDR network blocks for policies.",
+    "add_btn": "ADD ADDRESS",
+    "col_name": "Object Name",
+    "col_ips": "IP / CIDR Networks",
+    "col_actions": "Actions",
+    "empty_msg": "No address objects configured.",
+    "config_error": "Configuration Error",
+    "delete_fail": "Failed to delete address object from backend.",
+    "delete_title": "Delete Address Object?",
+    "delete_msg": "Are you sure you want to delete the address '{{name}}'? Ensure it is not being used in any active policies.",
+    "delete_confirm": "YES, DELETE"
+  },
+  "address_drawer": {
+    "create_title": "Create Address Object",
+    "edit_title": "Edit Address: {{name}}",
+    "drawer_desc": "Configure reusable network or host definitions.",
+    "name": "Object Name",
+    "ips": "IP Addresses (CIDR Format)",
+    "ips_desc": "Comma separated (e.g. 192.168.1.0/24, 10.0.0.5/32)",
+    "cancel": "CANCEL",
+    "committing": "COMMITTING...",
+    "apply": "APPLY CHANGES",
+    "val_error": "Validation Error",
+    "req_fields": "Name and at least one valid IP/CIDR are required."
+  },
   "services": {
     "title": "Network Services",
     "desc": "Define custom protocols and ports for policy matching.",
@@ -289,7 +316,8 @@
     },
     "objects": {
       "zones": "Zones",
-      "services": "Services"
+      "services": "Services",
+      "addresses": "Addresses"
     }
   },
   "errors": {

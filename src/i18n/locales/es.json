@@ -1,4 +1,31 @@
 {
+  "addresses": {
+    "title": "Objetos de Dirección",
+    "desc": "Define bloques de red IP y CIDR reutilizables para las políticas.",
+    "add_btn": "AÑADIR DIRECCIÓN",
+    "col_name": "Nombre del Objeto",
+    "col_ips": "Redes IP / CIDR",
+    "col_actions": "Acciones",
+    "empty_msg": "No hay objetos de dirección configurados.",
+    "config_error": "Error de Configuración",
+    "delete_fail": "Error al eliminar el objeto desde el backend.",
+    "delete_title": "¿Eliminar Objeto de Dirección?",
+    "delete_msg": "¿Estás seguro de que deseas eliminar la dirección '{{name}}'? Asegúrate de que no se esté usando en ninguna política activa.",
+    "delete_confirm": "SÍ, ELIMINAR"
+  },
+  "address_drawer": {
+    "create_title": "Crear Objeto de Dirección",
+    "edit_title": "Editar Dirección: {{name}}",
+    "drawer_desc": "Configura definiciones de red o host reutilizables.",
+    "name": "Nombre del Objeto",
+    "ips": "Direcciones IP (Formato CIDR)",
+    "ips_desc": "Separadas por comas (ej. 192.168.1.0/24, 10.0.0.5/32)",
+    "cancel": "CANCELAR",
+    "committing": "APLICANDO...",
+    "apply": "APLICAR CAMBIOS",
+    "val_error": "Error de Validación",
+    "req_fields": "El nombre y al menos una IP/CIDR válida son obligatorios."
+  },
   "services": {
     "title": "Servicios de Red",
     "desc": "Define protocolos y puertos personalizados para las políticas.",
@@ -285,7 +312,8 @@
     },
     "objects": {
       "zones": "Zonas",
-      "services": "Servicios"
+      "services": "Servicios",
+      "addresses": "Direcciones"
     }
   },
   "errors": {
