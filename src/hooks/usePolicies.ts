@@ -112,5 +112,47 @@ export function usePolicies() {
         }
     };
 
-    return { policies, fetchPolicies, savePolicy, deletePolicy, isLoading, error };
+    const movePolicy = async (id: number, position: 'top' | 'bottom' | 'before' | 'after', referenceId?: number) => {
+        setIsLoading(true);
+        setError('');
+        let sessionStarted = false;
+
+        try {
+            const resBegin = await fetch('/api/config/begin', { method: 'POST', headers: getHeaders() });
+            if (!resBegin.ok) throw new Error(await resBegin.text());
+            sessionStarted = true;
+
+            const resMove = await fetch(`/api/policies/${id}/move`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify({ position, reference_id: referenceId })
+            });
+
+            let stepError = '';
+            if (!resMove.ok) stepError = await resMove.text();
+
+            const resCommit = await fetch('/api/config/commit', { method: 'POST', headers: getHeaders() });
+            sessionStarted = false;
+
+            if (!resCommit.ok) throw new Error(`Validation Error: ${await resCommit.text()}`);
+            if (stepError) throw new Error(stepError);
+
+            await fetchPolicies();
+            return true;
+        } catch (err: any) {
+            setError(err.message || 'Error moving policy');
+            if (sessionStarted) {
+                try { await fetch('/api/config/commit', { method: 'POST', headers: getHeaders() }); }
+                catch (e) { console.error("Failsafe unlock failed", e); }
+            }
+            return false;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return { policies, fetchPolicies, savePolicy, deletePolicy, movePolicy, isLoading, error };
+
 }
+
+
