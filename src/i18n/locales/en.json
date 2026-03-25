@@ -1,4 +1,34 @@
 {
+  "services": {
+    "title": "Network Services",
+    "desc": "Define custom protocols and ports for policy matching.",
+    "add_btn": "ADD SERVICE",
+    "col_name": "Service Name",
+    "col_protocol": "Protocol",
+    "col_ports": "Ports",
+    "col_actions": "Actions",
+    "empty_msg": "No services configured.",
+    "config_error": "Configuration Error",
+    "delete_fail": "Failed to delete service from backend.",
+    "delete_title": "Delete Service?",
+    "delete_msg": "Are you sure you want to delete the service '{{name}}'? Ensure it is not being used in any active policies.",
+    "delete_confirm": "YES, DELETE"
+  },
+  "service_drawer": {
+    "create_title": "Create Network Service",
+    "edit_title": "Edit Service: {{name}}",
+    "drawer_desc": "Configure Layer 4 port matching rules.",
+    "name": "Service Name",
+    "protocol": "Protocol",
+    "ports": "Destination Ports",
+    "ports_desc": "Comma separated (e.g. 80, 443, 8080)",
+    "cancel": "CANCEL",
+    "committing": "COMMITTING...",
+    "apply": "APPLY CHANGES",
+    "val_error": "Validation Error",
+    "req_fields": "Name and at least one valid port are required.",
+    "invalid_ports": "Ports must be numbers between 1 and 65535."
+  },
   "policies": {
     "title": "Security Policies",
     "desc": "Manage access control rules between security zones.",
@@ -258,7 +288,8 @@
       "admins": "Admins"
     },
     "objects": {
-      "zones": "Zones"
+      "zones": "Zones",
+      "services": "Services"
     }
   },
   "errors": {

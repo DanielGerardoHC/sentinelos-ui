@@ -1,4 +1,34 @@
 {
+  "services": {
+    "title": "Servicios de Red",
+    "desc": "Define protocolos y puertos personalizados para las políticas.",
+    "add_btn": "AÑADIR SERVICIO",
+    "col_name": "Nombre del Servicio",
+    "col_protocol": "Protocolo",
+    "col_ports": "Puertos",
+    "col_actions": "Acciones",
+    "empty_msg": "No hay servicios configurados.",
+    "config_error": "Error de Configuración",
+    "delete_fail": "Error al eliminar el servicio desde el backend.",
+    "delete_title": "¿Eliminar Servicio?",
+    "delete_msg": "¿Estás seguro de que deseas eliminar el servicio '{{name}}'? Asegúrate de que no se esté usando en ninguna política activa.",
+    "delete_confirm": "SÍ, ELIMINAR"
+  },
+  "service_drawer": {
+    "create_title": "Crear Servicio de Red",
+    "edit_title": "Editar Servicio: {{name}}",
+    "drawer_desc": "Configura las reglas de coincidencia de puertos de Capa 4.",
+    "name": "Nombre del Servicio",
+    "protocol": "Protocolo",
+    "ports": "Puertos de Destino",
+    "ports_desc": "Separados por comas (ej. 80, 443, 8080)",
+    "cancel": "CANCELAR",
+    "committing": "APLICANDO...",
+    "apply": "APLICAR CAMBIOS",
+    "val_error": "Error de Validación",
+    "req_fields": "El nombre y al menos un puerto válido son obligatorios.",
+    "invalid_ports": "Los puertos deben ser números entre 1 y 65535."
+  },
   "policies": {
     "title": "Políticas de Seguridad",
     "desc": "Gestiona las reglas de control de acceso entre zonas de seguridad.",
@@ -254,7 +284,8 @@
       "admins": "Administradores"
     },
     "objects": {
-      "zones": "Zonas"
+      "zones": "Zonas",
+      "services": "Servicios"
     }
   },
   "errors": {

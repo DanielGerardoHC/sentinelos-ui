@@ -49,7 +49,8 @@ const sidebarData: Record<string, MenuItem[]> = {
         { key: 'sidebar.system.admins', fallback: 'Admins', link: '/management' },
     ],
     objects: [
-        { key: 'sidebar.objects.zones', fallback: 'Zones', link: '/zones' }
+        { key: 'sidebar.objects.zones', fallback: 'Zones', link: '/zones' },
+        { key: 'sidebar.objects.services', fallback: 'Services', link: '/services' }
     ]
 };
 
