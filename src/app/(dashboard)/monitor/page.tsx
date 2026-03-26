@@ -8,7 +8,7 @@ export default function VPNPage() {
         <div className="space-y-6">
             <PageHeader
                 title="Monitor"
-                description="Montor traffic"
+                description="Traffic Monitor"
             />
             <ComingSoon />
         </div>
