@@ -1,4 +1,8 @@
 {
+  "coming_soon": {
+    "title": "Module in Development",
+    "desc": "This section of SentinelOS is currently under construction. Our engineering team is working on bringing you this feature in an upcoming firmware release."
+  },
   "addresses": {
     "title": "Address Objects",
     "desc": "Define reusable IP and CIDR network blocks for policies.",

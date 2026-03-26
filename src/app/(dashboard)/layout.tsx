@@ -25,10 +25,10 @@ const sidebarData: Record<string, MenuItem[]> = {
         },
         { key: 'sidebar.network.routing', fallback: 'Routing', link: '/network/routing' },
         {
-            key: 'sidebar.network.vpn', fallback: 'VPN', link: '/network/vlans',
-            subItems: [{ key: 'sidebar.network.ipsec_vpn', fallback: 'IPsec', link: '/network/ipsec' },
-                       { key: 'sidebar.network.ssl_vpn', fallback: 'SSL VPN', link: '/network/ssl' },
-                       { key: 'sidebar.network.vxlan', fallback: 'VXlan', link: '/network/vxlan' },
+            key: 'sidebar.network.vpn', fallback: 'VPN', link: '/network/vpn',
+            subItems: [{ key: 'sidebar.network.ipsec_vpn', fallback: 'IPsec', link: '/network/vpn/ipsec_vpn' },
+                       { key: 'sidebar.network.ssl_vpn', fallback: 'SSL VPN', link: '/network/vpn/ssl_vpn' },
+                       { key: 'sidebar.network.vxlan', fallback: 'VXlan', link: '/network/vpn/vxlan' },
             ]
         },
     ],
@@ -41,8 +41,6 @@ const sidebarData: Record<string, MenuItem[]> = {
         {
             key: 'sidebar.system.dashboard', fallback: 'Dashboard', link: '/system',
             subItems: [
-                { key: 'sidebar.system.overview', fallback: 'System Overview', link: '/system' },
-                { key: 'sidebar.system.users', fallback: 'Users', link: '/system/users' },
                 { key: 'sidebar.system.threats', fallback: 'Threats', link: '/system/threats' }
             ]
         },

@@ -4,8 +4,8 @@ import { RefreshCw } from "lucide-react";
 interface PageHeaderProps {
     title: string;
     description: string;
-    isLoading: boolean;
-    onRefresh: () => void;
+    isLoading?: boolean;
+    onRefresh?: () => void;
     onAdd?: () => void;
     addText?: string;
 }

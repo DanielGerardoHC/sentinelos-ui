@@ -30,19 +30,37 @@ export function DhcpDrawer({ isOpen, onClose, interfaceName, onSuccess }: DhcpDr
     const [dns2, setDns2] = useState('1.1.1.1');
     const [leaseTime, setLeaseTime] = useState(1440);
 
-    // 1. Al abrir el drawer, pedimos los datos UNA SOLA VEZ
+
+
+    const [isFetchingLocal, setIsFetchingLocal] = useState(false);
+
     useEffect(() => {
         if (isOpen && interfaceName) {
             setIsInitialized(false);
-            fetchDhcpPools();
+            setIsFetchingLocal(true); //
+
+            (async () => {
+                await fetchDhcpPools();
+                setIsFetchingLocal(false);
+            })();
+        } else {
+            setIsInitialized(false);
+            setDhcpEnabled(false);
+            setExistsInApi(false);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, interfaceName]);
 
-    // 2. Poblamos el formulario SOLO cuando la API responde y no lo hemos inicializado aún
     useEffect(() => {
-        if (isOpen && interfaceName && !isLoading && !isInitialized && dhcpPools) {
-            const existingConfig = dhcpPools.find(d => d.interface === interfaceName);
+        if (isOpen && interfaceName && !isFetchingLocal && !isInitialized && dhcpPools) {
+
+            let existingConfig = null;
+
+            if (Array.isArray(dhcpPools)) {
+                existingConfig = dhcpPools.find(d => d.interface === interfaceName);
+            } else {
+                existingConfig = dhcpPools[interfaceName];
+            }
+
             if (existingConfig) {
                 setExistsInApi(true);
                 setDhcpEnabled(true);
@@ -62,9 +80,9 @@ export function DhcpDrawer({ isOpen, onClose, interfaceName, onSuccess }: DhcpDr
                 setDns2('');
                 setLeaseTime(1440);
             }
-            setIsInitialized(true); // Sellamos el formulario para evitar bucles si haces clic en algo
+            setIsInitialized(true); // Sellamos el formulario
         }
-    }, [isOpen, interfaceName, isLoading, dhcpPools, isInitialized]);
+    }, [isOpen, interfaceName, isFetchingLocal, dhcpPools, isInitialized]);
 
     const handleSave = async () => {
         if (!dhcpEnabled) {

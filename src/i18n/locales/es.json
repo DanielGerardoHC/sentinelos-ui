@@ -1,4 +1,8 @@
 {
+  "coming_soon": {
+    "title": "Módulo en Desarrollo",
+    "desc": "Esta sección de SentinelOS se encuentra actualmente en construcción. Nuestro equipo de ingeniería está trabajando para habilitar esta función en la próxima actualización de firmware."
+  },
   "addresses": {
     "title": "Objetos de Dirección",
     "desc": "Define bloques de red IP y CIDR reutilizables para las políticas.",
