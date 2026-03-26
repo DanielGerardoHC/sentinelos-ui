@@ -26,7 +26,9 @@ export function useDhcp() {
             const res = await fetch('/api/dhcp', { headers: getHeaders() });
             if (!res.ok) throw new Error('Error fetching DHCP pools');
             const data = await res.json();
-            setDhcpPools(data || []);
+            const poolsArray = data ? Object.values(data) as DhcpConfig[] : [];
+            setDhcpPools(poolsArray);
+
         } catch (err: any) {
             setError(err.message);
         } finally {
