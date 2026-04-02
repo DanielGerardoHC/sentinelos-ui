@@ -2,19 +2,16 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import dynamic from 'next/dynamic';
 
-
 import { usePolicies, PolicyInterface } from '@/hooks/usePolicies';
 import { useZones } from '@/hooks/useZones';
 import { useAddresses } from '@/hooks/useAddresses';
 import { useServices } from '@/hooks/useServices';
 
-
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { ShieldCheck, Save, Plus, Check } from "lucide-react";
+import { ShieldCheck, Save, Plus, ChevronDown, X } from "lucide-react"; // Añadimos ChevronDown y X
 import { AlertModal } from './AlertModal';
-
 
 const ZoneEditDrawer = dynamic(() => import('./ZoneEditDrawer').then(m => m.ZoneEditDrawer), { ssr: false });
 const AddressEditDrawer = dynamic(() => import('./AddressDrawer').then(m => m.AddressEditDrawer), { ssr: false });
@@ -46,8 +43,10 @@ export function PolicyEditDrawer({ isOpen, onClose, policyData, onSuccess, onErr
     const [formAction, setFormAction] = useState<'allow' | 'deny'>('allow');
     const [formLog, setFormLog] = useState(false);
 
-    const [localAlert, setLocalAlert] = useState({ isOpen: false, msg: '' });
+    // Estado para nuestro Dropdown de Servicios
+    const [isServiceDropdownOpen, setIsServiceDropdownOpen] = useState(false);
 
+    const [localAlert, setLocalAlert] = useState({ isOpen: false, msg: '' });
     const [activeNestedDrawer, setActiveNestedDrawer] = useState<'zone' | 'address' | 'service' | null>(null);
 
     useEffect(() => {
@@ -126,9 +125,9 @@ export function PolicyEditDrawer({ isOpen, onClose, policyData, onSuccess, onErr
                         </SheetHeader>
                     </div>
 
-                    <div className="p-6 space-y-6 flex-1 overflow-y-auto">
+                    <div className="p-6 space-y-6 flex-1 overflow-y-auto relative">
 
-                        {/* ================= ZONAS ================= */}
+
                         <div className="grid grid-cols-2 gap-6 p-4 rounded-lg border border-zinc-800/50 bg-zinc-900/20">
                             <div className="space-y-3">
                                 <div className="flex justify-between items-center">
@@ -152,7 +151,7 @@ export function PolicyEditDrawer({ isOpen, onClose, policyData, onSuccess, onErr
                             </div>
                         </div>
 
-                        {/* ================= DIRECCIONES ================= */}
+
                         <div className="grid grid-cols-2 gap-6 p-4 rounded-lg border border-zinc-800/50 bg-zinc-900/20">
                             <div className="space-y-3">
                                 <div className="flex justify-between items-center">
@@ -160,7 +159,7 @@ export function PolicyEditDrawer({ isOpen, onClose, policyData, onSuccess, onErr
                                     <button onClick={() => setActiveNestedDrawer('address')} className="text-emerald-500 hover:text-emerald-400 text-[10px] font-mono flex items-center gap-1"><Plus className="w-3 h-3"/> {t('policy_drawer.create_new')}</button>
                                 </div>
                                 <select value={formSrcAddr} onChange={(e) => setFormSrcAddr(e.target.value)} className="w-full h-11 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 font-mono focus:ring-1 focus:ring-emerald-500/50 outline-none">
-                                    <option value="">{t('policy_drawer.any_address')}</option>
+                                    <option value="">{t('policy_drawer.any_address', 'Any (0.0.0.0/0)')}</option>
                                     {addresses.map(a => <option key={a.name} value={a.name}>{a.name}</option>)}
                                 </select>
                             </div>
@@ -170,49 +169,89 @@ export function PolicyEditDrawer({ isOpen, onClose, policyData, onSuccess, onErr
                                     <button onClick={() => setActiveNestedDrawer('address')} className="text-emerald-500 hover:text-emerald-400 text-[10px] font-mono flex items-center gap-1"><Plus className="w-3 h-3"/> {t('policy_drawer.create_new')}</button>
                                 </div>
                                 <select value={formDstAddr} onChange={(e) => setFormDstAddr(e.target.value)} className="w-full h-11 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 font-mono focus:ring-1 focus:ring-emerald-500/50 outline-none">
-                                    <option value="">{t('policy_drawer.any_address')}</option>
+                                    <option value="">{t('policy_drawer.any_address', 'Any (0.0.0.0/0)')}</option>
                                     {addresses.map(a => <option key={a.name} value={a.name}>{a.name}</option>)}
                                 </select>
                             </div>
                         </div>
 
-                        {/* ================= SERVICIOS (Multi-Select Tags) ================= */}
-                        <div className="space-y-3 p-4 rounded-lg border border-zinc-800/50 bg-zinc-900/20">
+
+                        <div className="space-y-3 p-4 rounded-lg border border-zinc-800/50 bg-zinc-900/20 relative">
                             <div className="flex justify-between items-center mb-2">
                                 <Label className="text-zinc-500 font-mono text-xs uppercase">{t('policy_drawer.services')}</Label>
                                 <button onClick={() => setActiveNestedDrawer('service')} className="text-emerald-500 hover:text-emerald-400 text-[10px] font-mono flex items-center gap-1"><Plus className="w-3 h-3"/> {t('policy_drawer.create_new')}</button>
                             </div>
 
-                            {services.length === 0 ? (
-                                <div className="text-zinc-600 text-xs font-mono p-3 border border-zinc-800 border-dashed rounded text-center">
-                                    {t('policy_drawer.no_services')}
+                            <div className="relative">
+                                {/* Componente Visual del Select */}
+                                <div
+                                    className="w-full min-h-[44px] rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 font-mono cursor-pointer flex flex-wrap gap-2 items-center transition-colors hover:border-zinc-700 focus-within:ring-1 focus-within:ring-emerald-500/50"
+                                    onClick={() => setIsServiceDropdownOpen(!isServiceDropdownOpen)}
+                                >
+                                    {formServices.length === 0 ? (
+                                        <span className="text-emerald-500 font-bold">{t('policies.any', 'ANY')}</span>
+                                    ) : (
+                                        formServices.map(svcName => (
+                                            <span key={svcName} className="bg-zinc-800 border border-zinc-700 text-emerald-400 px-2 py-1 rounded text-xs flex items-center gap-1">
+                                                {svcName}
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        toggleService(svcName);
+                                                    }}
+                                                    className="hover:text-red-400 transition-colors ml-1"
+                                                >
+                                                    <X className="w-3 h-3" />
+                                                </button>
+                                            </span>
+                                        ))
+                                    )}
+                                    <ChevronDown className={`w-4 h-4 text-zinc-500 ml-auto transition-transform ${isServiceDropdownOpen ? 'rotate-180' : ''}`} />
                                 </div>
-                            ) : (
-                                <div className="flex flex-wrap gap-2">
-                                    <button
-                                        onClick={() => setFormServices([])}
-                                        className={`px-3 py-1.5 rounded border font-mono text-xs transition-colors ${formServices.length === 0 ? 'bg-emerald-500 text-zinc-950 border-emerald-500 font-bold' : 'bg-zinc-950 border-zinc-700 text-zinc-400 hover:border-zinc-500'}`}
-                                    >
-                                        {t('policies.any')}
-                                    </button>
-                                    {services.map(svc => {
-                                        const isSelected = formServices.includes(svc.name);
-                                        return (
-                                            <button
-                                                key={svc.name}
-                                                onClick={() => toggleService(svc.name)}
-                                                className={`px-3 py-1.5 rounded border font-mono text-xs flex items-center gap-1 transition-colors ${isSelected ? 'bg-zinc-800 border-emerald-500/50 text-emerald-400' : 'bg-zinc-950 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300'}`}
-                                            >
-                                                {isSelected && <Check className="w-3 h-3" />}
-                                                {svc.name}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            )}
+
+
+                                {isServiceDropdownOpen && (
+                                    <div className="fixed inset-0 z-10" onClick={() => setIsServiceDropdownOpen(false)}></div>
+                                )}
+
+
+                                {isServiceDropdownOpen && (
+                                    <div className="absolute z-20 top-full mt-2 w-full bg-[#09090b] border border-zinc-800 rounded-md shadow-2xl max-h-60 overflow-y-auto">
+                                        <div className="p-2 flex flex-col gap-1">
+
+                                            {/* Opción ANY */}
+                                            <label className={`flex items-center gap-3 p-2 rounded cursor-pointer transition-colors ${formServices.length === 0 ? 'bg-emerald-500/10 text-emerald-400' : 'hover:bg-zinc-900 text-zinc-300'}`}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formServices.length === 0}
+                                                    onChange={() => setFormServices([])}
+                                                    className="w-4 h-4 accent-emerald-500 bg-zinc-950 border-zinc-700 rounded"
+                                                />
+                                                <span className="font-mono text-sm">{t('policies.any', 'ANY')}</span>
+                                            </label>
+
+
+                                            {services.map(svc => {
+                                                const isSelected = formServices.includes(svc.name);
+                                                return (
+                                                    <label key={svc.name} className={`flex items-center gap-3 p-2 rounded cursor-pointer transition-colors ${isSelected ? 'bg-zinc-900/50 text-emerald-400' : 'hover:bg-zinc-900 text-zinc-300'}`}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={isSelected}
+                                                            onChange={() => toggleService(svc.name)}
+                                                            className="w-4 h-4 accent-emerald-500 bg-zinc-950 border-zinc-700 rounded"
+                                                        />
+                                                        <span className="font-mono text-sm">{svc.name}</span>
+                                                    </label>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
-                        {/* ================= ACCIÓN Y LOG ================= */}
+
                         <div className="pt-2 space-y-6">
                             <div className="space-y-3">
                                 <Label className="text-zinc-500 font-mono text-xs uppercase flex items-center justify-between">
@@ -250,7 +289,7 @@ export function PolicyEditDrawer({ isOpen, onClose, policyData, onSuccess, onErr
                 </SheetContent>
             </Sheet>
 
-            {/* MODALES Y CAJONES ANIDADOS */}
+
             <AlertModal
                 isOpen={localAlert.isOpen}
                 type="error"
