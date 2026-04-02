@@ -88,7 +88,7 @@ export default function InterfacesPage() {
                                 {iface.name}
                             </div>
                         </TableCell>
-                        <TableCell><StatusBadge state={iface.state} /></TableCell>
+                        <TableCell><StatusBadge state={iface.state || 'down'} /></TableCell>
                         <TableCell className="font-mono text-sm text-zinc-300">
                             {iface.ip || <span className="text-zinc-600 italic text-xs">{t('interfaces.unassigned')}</span>}
                         </TableCell>
