@@ -52,7 +52,7 @@ export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess, onError }: Vl
 
     useEffect(() => {
         if (isOpen) {
-            fetchPhysicalInterfaces();
+            fetchPhysicalInterfaces('2');
             fetchZones();
 
             if (vlan) {
@@ -108,10 +108,10 @@ export function VlanEditDrawer({ isOpen, onClose, vlan, onSuccess, onError }: Vl
         setFormManagement(prev => prev.includes(service) ? prev.filter(s => s !== service) : [...prev, service]);
     };
 
+
     const parentOptions = physicalInterfaces.map(iface => ({
-        label: `${iface.name} ${iface.ip ? t('vlan_drawer.l3_active') : t('vlan_drawer.l2_ready')}`,
+        label: `${iface.name} ${t('vlan_drawer.l2_ready', '(L2 Ready)')}`,
         value: iface.name,
-        disabled: !!iface.ip
     }));
 
     const dynamicZoneOptions = zones.map(z => ({
