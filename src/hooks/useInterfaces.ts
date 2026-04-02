@@ -40,7 +40,7 @@ export function useInterfaces() {
         }
     }, []);
 
-    const editInterface = async (name: string, payload: Partial<NetworkInterface>) => {
+    const updateInterface = async (name: string, payload: Partial<NetworkInterface>) => {
         setIsLoading(true);
         setError('');
         let sessionStarted = false;
@@ -79,5 +79,5 @@ export function useInterfaces() {
         }
     };
 
-    return { interfaces, fetchInterfaces, editInterface, isLoading, error };
+    return { interfaces, fetchInterfaces, updateInterface, isLoading, error };
 }
