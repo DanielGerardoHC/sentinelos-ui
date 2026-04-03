@@ -240,14 +240,18 @@ export function SnatEditDrawer({ isOpen, onClose, natData, onSuccess, onError }:
 
                             {translationMode === 'specified' && (
                                 <div className="space-y-3 animate-in fade-in slide-in-from-top-2 p-4 rounded-lg border border-zinc-800/50 bg-zinc-900/20">
-                                    <div className="flex justify-between items-center">
-                                        <Label className="text-blue-400 font-mono text-xs uppercase">{t('nat_drawer.translated_ip_obj', 'Translated IP Object')} *</Label>
-                                        <button onClick={() => setActiveNestedDrawer('address')} className="text-blue-400 hover:text-blue-300 text-[10px] font-mono flex items-center gap-1"><Plus className="w-3 h-3"/> {t('nat_drawer.create_new', 'New')}</button>
-                                    </div>
-                                    <select value={formTranslatedIp} onChange={(e) => setFormTranslatedIp(e.target.value)} className="w-full h-11 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-blue-400 font-mono focus:ring-1 focus:ring-blue-500/50 outline-none">
-                                        <option value="" disabled>{t('nat_drawer.select_obj', 'Select Object...')}</option>
-                                        {addresses.map(a => <option key={a.name} value={a.name}>{a.name}</option>)}
-                                    </select>
+                                    <Label className="text-blue-400 font-mono text-xs uppercase">
+                                        {t('nat_drawer.translated_ip', 'Translated IPv4 Address')} *
+                                    </Label>
+                                    <Input
+                                        value={formTranslatedIp}
+                                        onChange={(e) => setFormTranslatedIp(e.target.value.replace(/[^0-9.]/g, ''))}
+                                        className="bg-zinc-950 border-zinc-800 text-blue-400 font-mono h-11 focus-visible:ring-blue-500/50"
+                                        placeholder="e.g. 190.20.30.40"
+                                    />
+                                    <p className="text-[10px] text-zinc-500 font-mono">
+                                        {t('nat_drawer.ip_only_hint', 'Enter a single IPv4 address without subnet mask.')}
+                                    </p>
                                 </div>
                             )}
 

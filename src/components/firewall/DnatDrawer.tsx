@@ -159,14 +159,15 @@ export function DnatEditDrawer({ isOpen, onClose, natData, onSuccess, onError }:
 
                         <div className="grid grid-cols-2 gap-6 p-4 rounded-lg border border-blue-900/30 bg-blue-950/10">
                             <div className="space-y-3">
-                                <div className="flex justify-between items-center">
-                                    <Label className="text-blue-400 font-mono text-xs uppercase">{t('nat_drawer.mapped_to', 'Mapped To (Internal IP)')} *</Label>
-                                    <button onClick={() => setActiveNestedDrawer('address')} className="text-blue-400 hover:text-blue-300 text-[10px] font-mono flex items-center gap-1"><Plus className="w-3 h-3"/> {t('nat_drawer.create_new', 'New')}</button>
-                                </div>
-                                <select value={formTranslatedIp} onChange={(e) => setFormTranslatedIp(e.target.value)} className="w-full h-11 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-blue-400 font-mono focus:ring-1 focus:ring-blue-500/50 outline-none">
-                                    <option value="" disabled>{t('nat_drawer.select_obj', 'Select Object...')}</option>
-                                    {addresses.map(a => <option key={a.name} value={a.name}>{a.name}</option>)}
-                                </select>
+                                <Label className="text-blue-400 font-mono text-xs uppercase">
+                                    {t('nat_drawer.mapped_to', 'Mapped To (Internal IPv4)')} *
+                                </Label>
+                                <Input
+                                    value={formTranslatedIp}
+                                    onChange={(e) => setFormTranslatedIp(e.target.value.replace(/[^0-9.]/g, ''))}
+                                    className="bg-zinc-950 border-zinc-800 text-blue-400 font-mono h-11 focus-visible:ring-blue-500/50"
+                                    placeholder="e.g. 10.20.10.50"
+                                />
                             </div>
 
                             {dnatMode === 'dnat-port' ? (
