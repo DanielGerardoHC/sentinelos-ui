@@ -350,6 +350,9 @@
     "policies": {
       "rules": "Security Rules",
       "nat": "NAT",
+      "dnat": "D-NAT",
+      "snat": "S-NAT",
+      "mnat": "M-NAT",
       "binding": "IP-MAC Binding"
     },
     "system": {
