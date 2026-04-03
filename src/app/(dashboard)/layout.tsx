@@ -37,7 +37,6 @@ const sidebarData: Record<string, MenuItem[]> = {
         { key: 'sidebar.policies.nat', fallback: 'NAT', link: '',
           subItems: [{ key: 'sidebar.snat', fallback: 'S-NAT', link: '/policies/nat/snat' },
                      { key: 'sidebar.dnat', fallback: 'D-NAT', link: '/policies/nat/dnat' },
-                     { key: 'sidebar.mnat', fallback: 'M-NAT', link: '/policies/nat/mnat' },
           ]
         },
         { key: 'sidebar.policies.binding', fallback: 'IP-MAC Binding', link: '/policies/binding' },

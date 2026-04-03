@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { usePolicies, PolicyInterface } from '@/hooks/usePolicies';
 import { useZones } from '@/hooks/useZones';
 
-// DND Kit Imports
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
@@ -34,9 +33,9 @@ export default function SecurityPoliciesPage() {
     const [backendError, setBackendError] = useState('');
     const [deleteConfirm, setDeleteConfirm] = useState<{isOpen: boolean, id: number}>({ isOpen: false, id: 0 });
 
-    // Configuración de los sensores de DND (Mouse/Touch + Teclado)
+
     const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }), // Evita clics accidentales
+        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
     );
 

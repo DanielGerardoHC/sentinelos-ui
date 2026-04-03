@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNat, NatRuleInterface } from '@/hooks/useNat';
+import { useZones } from '@/hooks/useZones';
+
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
@@ -20,6 +22,7 @@ import { ZoneBadge } from '@/components/firewall/FirewallBadges';
 export default function SnatPage() {
     const { t } = useTranslation();
     const { natRules, fetchNatRules, deleteNatRule, moveNatRule, isLoading } = useNat();
+    const { zones, fetchZones } = useZones(); // Traemos las zonas y su función fetch
 
     const [localRules, setLocalRules] = useState<NatRuleInterface[]>([]);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -34,7 +37,8 @@ export default function SnatPage() {
 
     useEffect(() => {
         fetchNatRules('snat');
-    }, [fetchNatRules]);
+        fetchZones();
+    }, [fetchNatRules, fetchZones]);
 
     useEffect(() => {
         setLocalRules(natRules);
@@ -57,7 +61,13 @@ export default function SnatPage() {
         }
     };
 
-    const tableColumns = [
+    const getZoneColor = (zoneName?: string) => {
+        if (!zoneName) return 'zinc';
+        const found = zones.find(z => z.name.toLowerCase() === zoneName.toLowerCase());
+        return found?.color || 'zinc';
+    };
+
+    const tableColumns: { label: string; className?: string }[] = [
         { label: "", className: "w-[40px]" },
         { label: "ID", className: "w-[60px] text-center" },
         { label: t('nat_drawer.src_zone') },
@@ -73,7 +83,7 @@ export default function SnatPage() {
                 title={t('snat.title')}
                 description={t('snat.desc')}
                 isLoading={isLoading}
-                onRefresh={() => fetchNatRules('snat')}
+                onRefresh={() => { fetchNatRules('snat'); fetchZones(); }}
                 onAdd={() => { setSelectedRule(null); setIsDrawerOpen(true); }}
                 addText={t('snat.add_btn')}
             />
@@ -89,23 +99,20 @@ export default function SnatPage() {
 
                                 <TableCell className="font-mono text-zinc-500 text-center font-bold text-xs">#{rule.id}</TableCell>
 
-                                {/* Origen */}
                                 <TableCell>
-                                    <div className="flex flex-col gap-1 items-start">
-                                        {rule['src-zone'] ? <ZoneBadge zone={rule['src-zone']} /> : <span className="font-mono text-[10px] text-zinc-500 border border-zinc-800 bg-zinc-900/50 px-1.5 rounded">{t('snat.any_zone')}</span>}
+                                    <div className="flex flex-col gap-1.5 items-start">
+                                        <ZoneBadge zone={rule['src-zone']} color={getZoneColor(rule['src-zone'])} />
                                         <span className="font-mono text-xs text-zinc-400">{rule['src-addr'] || t('snat.any_ip')}</span>
                                     </div>
                                 </TableCell>
 
-                                {/* Destino */}
                                 <TableCell>
-                                    <div className="flex flex-col gap-1 items-start">
-                                        {rule['dst-zone'] ? <ZoneBadge zone={rule['dst-zone']} /> : <span className="font-mono text-[10px] text-zinc-500 border border-zinc-800 bg-zinc-900/50 px-1.5 rounded">{t('snat.any_zone')}</span>}
+                                    <div className="flex flex-col gap-1.5 items-start">
+                                        <ZoneBadge zone={rule['dst-zone']} color={getZoneColor(rule['dst-zone'])} />
                                         <span className="font-mono text-xs text-zinc-400">{rule['dst-addr'] || t('snat.any_ip')}</span>
                                     </div>
                                 </TableCell>
 
-                                {/* Traducción */}
                                 <TableCell>
                                     <div className="flex flex-col gap-1 font-mono text-xs">
                                         {rule['translated-ip'] ? (
