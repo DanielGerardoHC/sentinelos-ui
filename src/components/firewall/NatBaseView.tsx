@@ -19,13 +19,13 @@ import { SortableNatRow } from './SortableNatRow';
 import { ZoneBadge } from '@/components/firewall/FirewallBadges';
 
 interface NatBaseViewProps {
-    actionType: 'snat' | 'dnat' | 'masquerade';
+    typeFilter: 'snat' | 'dnat-ip' | 'dnat-port' | 'dnat';
     titleKey: string;
     descKey: string;
     addBtnKey: string;
 }
 
-export function NatBaseView({ actionType, titleKey, descKey, addBtnKey }: NatBaseViewProps) {
+export function NatBaseView({ typeFilter, titleKey, descKey, addBtnKey }: NatBaseViewProps) {
     const { t } = useTranslation();
     const { natRules, fetchNatRules, deleteNatRule, moveNatRule, isLoading } = useNat();
 
@@ -41,8 +41,8 @@ export function NatBaseView({ actionType, titleKey, descKey, addBtnKey }: NatBas
     );
 
     useEffect(() => {
-        fetchNatRules(actionType);
-    }, [actionType, fetchNatRules]);
+        fetchNatRules(typeFilter as any);
+    }, [typeFilter, fetchNatRules]);
 
     useEffect(() => {
         setLocalRules(natRules);
@@ -65,7 +65,7 @@ export function NatBaseView({ actionType, titleKey, descKey, addBtnKey }: NatBas
     const confirmDelete = async () => {
         const success = await deleteNatRule(deleteConfirm.id);
         if (success) {
-            fetchNatRules(actionType);
+            fetchNatRules(typeFilter as any);
         } else {
             setBackendError(t('nat.config_error'));
         }
@@ -90,7 +90,7 @@ export function NatBaseView({ actionType, titleKey, descKey, addBtnKey }: NatBas
         const success = await moveNatRule(active.id as number, position, referenceId);
         if (!success) {
             setBackendError(t('nat.config_error'));
-            fetchNatRules(actionType);
+            fetchNatRules(typeFilter as any);
         }
     };
 
@@ -109,7 +109,7 @@ export function NatBaseView({ actionType, titleKey, descKey, addBtnKey }: NatBas
                 title={t(titleKey)}
                 description={t(descKey)}
                 isLoading={isLoading}
-                onRefresh={() => fetchNatRules(actionType)}
+                onRefresh={() => fetchNatRules(typeFilter as any)}
                 onAdd={handleAddClick}
                 addText={t(addBtnKey)}
             />
@@ -185,8 +185,8 @@ export function NatBaseView({ actionType, titleKey, descKey, addBtnKey }: NatBas
                     isOpen={isDrawerOpen}
                     onClose={() => setIsDrawerOpen(false)}
                     natData={selectedRule}
-                    defaultAction={actionType}
-                    onSuccess={() => fetchNatRules(actionType)}
+                    defaultAction={typeFilter as any}
+                    onSuccess={() => fetchNatRules(typeFilter as any)}
                     onError={(msg) => {
                         setIsDrawerOpen(false);
                         setBackendError(msg);
