@@ -1,11 +1,18 @@
+"use client";
+
 import { useState, useCallback } from 'react';
 
 export interface NatRuleInterface {
     id: number;
+    type: 'snat' | 'dnat-ip' | 'dnat-port';
     'src-zone'?: string;
     'dst-zone'?: string;
+    'src-addr'?: string;
+    'dst-addr'?: string;
+    service?: string;
     'out-interface'?: string;
-    action: 'masquerade' | 'snat' | 'dnat';
+    'translated-ip'?: string;
+    'translated-port'?: string;
     description?: string;
 }
 
@@ -21,11 +28,11 @@ export function useNat() {
             ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         };
     };
-
-    const fetchNatRules = useCallback(async (actionFilter?: 'masquerade' | 'snat' | 'dnat') => {
+    
+    const fetchNatRules = useCallback(async (typeFilter?: 'snat' | 'dnat-ip' | 'dnat-port') => {
         setIsLoading(true);
         try {
-            const url = actionFilter ? `/api/nat?action=${actionFilter}` : '/api/nat';
+            const url = typeFilter ? `/api/nat?type=${typeFilter}` : '/api/nat';
             const res = await fetch(url, { headers: getHeaders() });
             if (!res.ok) throw new Error('Error fetching NAT rules');
             const data = await res.json();
