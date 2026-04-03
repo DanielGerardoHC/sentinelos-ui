@@ -3,6 +3,43 @@
     "title": "Module in Development",
     "desc": "This section of SentinelOS is currently under construction. Our engineering team is working on bringing you this feature in an upcoming firmware release."
   },
+  "nat_drawer": {
+    "create_title": "Create NAT Rule",
+    "edit_title": "Edit NAT Rule #{{id}}",
+    "action": "Translation Type",
+    "src_zone": "Source Zone",
+    "dst_zone": "Destination Zone",
+    "out_iface": "Outgoing Interface",
+    "description": "Description",
+    "cancel": "Cancel",
+    "apply": "Apply",
+    "saving": "Saving...",
+    "error": "Validation Error",
+    "req_action": "Action is required",
+    "any": "ANY"
+  },
+  "nat": {
+    "empty_msg": "No NAT rules configured",
+    "delete_title": "Delete Rule",
+    "delete_msg": "Are you sure you want to delete NAT rule #{{id}}?",
+    "delete_confirm": "Delete",
+    "config_error": "Configuration Error"
+  },
+  "snat": {
+    "title": "SNAT Rules",
+    "desc": "Static Source Network Address Translation",
+    "add_btn": "Add SNAT"
+  },
+  "dnat": {
+    "title": "DNAT Rules",
+    "desc": "Destination Network Address Translation (Port Forwarding)",
+    "add_btn": "Add DNAT"
+  },
+  "mnat": {
+    "title": "Masquerade Rules",
+    "desc": "Dynamic Source Network Address Translation",
+    "add_btn": "Add Masquerade"
+  },
   "addresses": {
     "title": "Address Objects",
     "desc": "Define reusable IP and CIDR network blocks for policies.",

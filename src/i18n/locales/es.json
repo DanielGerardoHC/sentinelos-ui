@@ -3,6 +3,43 @@
     "title": "Módulo en Desarrollo",
     "desc": "Esta sección de SentinelOS se encuentra actualmente en construcción. Nuestro equipo de ingeniería está trabajando para habilitar esta función en la próxima actualización de firmware."
   },
+  "nat_drawer": {
+    "create_title": "Crear Regla NAT",
+    "edit_title": "Editar Regla NAT #{{id}}",
+    "action": "Tipo de Traducción",
+    "src_zone": "Zona de Origen",
+    "dst_zone": "Zona de Destino",
+    "out_iface": "Interfaz de Salida",
+    "description": "Descripción",
+    "cancel": "Cancelar",
+    "apply": "Aplicar",
+    "saving": "Guardando...",
+    "error": "Error de Validación",
+    "req_action": "La acción es obligatoria",
+    "any": "CUALQUIERA"
+  },
+  "nat": {
+    "empty_msg": "No hay reglas NAT configuradas",
+    "delete_title": "Eliminar Regla",
+    "delete_msg": "¿Estás seguro de eliminar la regla NAT #{{id}}?",
+    "delete_confirm": "Eliminar",
+    "config_error": "Error de Configuración"
+  },
+  "snat": {
+    "title": "Reglas SNAT",
+    "desc": "Traducción de Dirección de Red de Origen Estática",
+    "add_btn": "Añadir SNAT"
+  },
+  "dnat": {
+    "title": "Reglas DNAT",
+    "desc": "Traducción de Dirección de Red de Destino (Reenvío de Puertos)",
+    "add_btn": "Añadir DNAT"
+  },
+  "mnat": {
+    "title": "Reglas Masquerade",
+    "desc": "Traducción de Dirección de Red de Origen Dinámica",
+    "add_btn": "Añadir Masquerade"
+  },
   "addresses": {
     "title": "Objetos de Dirección",
     "desc": "Define bloques de red IP y CIDR reutilizables para las políticas.",
