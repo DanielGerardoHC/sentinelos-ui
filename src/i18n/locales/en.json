@@ -31,18 +31,26 @@
   "snat": {
     "title": "SNAT Rules",
     "desc": "Static Source Network Address Translation",
-    "add_btn": "Add SNAT"
+    "add_btn": "Add SNAT",
+    "translation_col": "Translation",
+    "static_lbl": "Static",
+    "masq_lbl": "Masquerade",
+    "any_ip": "Any IP",
+    "any_zone": "ANY ZONE"
   },
   "dnat": {
     "title": "DNAT Rules",
     "desc": "Destination Network Address Translation (Port Forwarding)",
-    "add_btn": "Add DNAT"
+    "add_btn": "Add DNAT",
+    "type_col": "Type",
+    "public_addr_col": "Public Address",
+    "internal_svr_col": "Internal Server",
+    "port_svc_col": "Port / Service",
+    "port_mapping": "Port Mapping",
+    "ip_mapping": "IP Mapping",
+    "all_traffic": "All Traffic"
   },
-  "mnat": {
-    "title": "Masquerade Rules",
-    "desc": "Dynamic Source Network Address Translation",
-    "add_btn": "Add Masquerade"
-  },
+
   "addresses": {
     "title": "Address Objects",
     "desc": "Define reusable IP and CIDR network blocks for policies.",

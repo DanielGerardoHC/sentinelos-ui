@@ -31,12 +31,24 @@
   "snat": {
     "title": "Reglas SNAT",
     "desc": "Traducción de Dirección de Red de Origen Estática",
-    "add_btn": "Añadir SNAT"
+    "add_btn": "Añadir SNAT",
+    "translation_col": "Traducción",
+    "static_lbl": "Estático",
+    "masq_lbl": "Masquerade",
+    "any_ip": "Cualquier IP",
+    "any_zone": "CUALQUIER ZONA"
   },
   "dnat": {
     "title": "Reglas DNAT",
     "desc": "Traducción de Dirección de Red de Destino (Reenvío de Puertos)",
-    "add_btn": "Añadir DNAT"
+    "add_btn": "Añadir DNAT",
+    "type_col": "Tipo",
+    "public_addr_col": "Dirección Pública",
+    "internal_svr_col": "Servidor Interno",
+    "port_svc_col": "Puerto / Servicio",
+    "port_mapping": "Mapeo de Puerto",
+    "ip_mapping": "Mapeo de IP",
+    "all_traffic": "Todo el Tráfico"
   },
   "mnat": {
     "title": "Reglas Masquerade",

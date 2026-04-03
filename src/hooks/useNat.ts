@@ -28,8 +28,8 @@ export function useNat() {
             ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         };
     };
-    
-    const fetchNatRules = useCallback(async (typeFilter?: 'snat' | 'dnat-ip' | 'dnat-port') => {
+
+    const fetchNatRules = useCallback(async (typeFilter?: 'snat' | 'dnat-ip' | 'dnat-port'| 'dnat') => {
         setIsLoading(true);
         try {
             const url = typeFilter ? `/api/nat?type=${typeFilter}` : '/api/nat';
