@@ -1,21 +1,24 @@
-"use client";
-
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import dynamic from 'next/dynamic';
+
 import { useNat, NatRuleInterface } from '@/hooks/useNat';
-import { useInterfaces } from '@/hooks/useInterfaces';
 import { useZones } from '@/hooks/useZones';
 import { useAddresses } from '@/hooks/useAddresses';
 import { useServices } from '@/hooks/useServices';
+import { useInterfaces } from '@/hooks/useInterfaces';
+import { useVlans } from '@/hooks/useVlans';
 
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Network, Save } from "lucide-react";
-
-import { ResourceSelector } from './ResourceSelector';
+import { Input } from "@/components/ui/input";
+import { Network, Save, Plus } from "lucide-react";
 import { AlertModal } from './AlertModal';
+
+const ZoneEditDrawer = dynamic(() => import('./ZoneEditDrawer').then(m => m.ZoneEditDrawer), { ssr: false });
+const AddressEditDrawer = dynamic(() => import('./AddressDrawer').then(m => m.AddressEditDrawer), { ssr: false });
+const ServiceEditDrawer = dynamic(() => import('./ServiceDrawer').then(m => m.ServiceEditDrawer), { ssr: false });
 
 interface SnatEditDrawerProps {
     isOpen: boolean;
@@ -29,14 +32,13 @@ export function SnatEditDrawer({ isOpen, onClose, natData, onSuccess, onError }:
     const { t } = useTranslation();
     const { saveNatRule, isLoading, error } = useNat();
 
-
-    const { interfaces, fetchInterfaces } = useInterfaces();
     const { zones, fetchZones } = useZones();
     const { addresses, fetchAddresses } = useAddresses();
     const { services, fetchServices } = useServices();
+    const { interfaces, fetchInterfaces } = useInterfaces();
+    const { vlans, fetchVlans } = useVlans();
 
     const isEditMode = !!natData;
-
 
     const [formSrcZone, setFormSrcZone] = useState('');
     const [formDstZone, setFormDstZone] = useState('');
@@ -45,19 +47,20 @@ export function SnatEditDrawer({ isOpen, onClose, natData, onSuccess, onError }:
     const [formOutIface, setFormOutIface] = useState('');
     const [formService, setFormService] = useState('');
 
-
     const [translationMode, setTranslationMode] = useState<'egress' | 'specified'>('egress');
     const [formTranslatedIp, setFormTranslatedIp] = useState('');
-
     const [formDesc, setFormDesc] = useState('');
+
     const [localAlert, setLocalAlert] = useState({ isOpen: false, msg: '' });
+    const [activeNestedDrawer, setActiveNestedDrawer] = useState<'zone' | 'address' | 'service' | null>(null);
 
     useEffect(() => {
         if (isOpen) {
-            fetchInterfaces();
             fetchZones();
             fetchAddresses();
             fetchServices();
+            fetchInterfaces();
+            fetchVlans();
 
             if (natData) {
                 setFormSrcZone(natData['src-zone'] || '');
@@ -75,7 +78,6 @@ export function SnatEditDrawer({ isOpen, onClose, natData, onSuccess, onError }:
                     setTranslationMode('egress');
                     setFormTranslatedIp('');
                 }
-
             } else {
                 setFormSrcZone('');
                 setFormDstZone('');
@@ -88,7 +90,7 @@ export function SnatEditDrawer({ isOpen, onClose, natData, onSuccess, onError }:
                 setFormDesc('');
             }
         }
-    }, [isOpen, natData, fetchInterfaces, fetchZones, fetchAddresses, fetchServices]);
+    }, [isOpen, natData, fetchZones, fetchAddresses, fetchServices, fetchInterfaces, fetchVlans]);
 
     useEffect(() => {
         if (error && onError) onError(error);
@@ -96,12 +98,12 @@ export function SnatEditDrawer({ isOpen, onClose, natData, onSuccess, onError }:
 
     const handleSave = async () => {
         if (!formOutIface) {
-            setLocalAlert({ isOpen: true, msg: "Egress Interface is required for SNAT." });
+            setLocalAlert({ isOpen: true, msg: t('nat_drawer.error_no_egress', 'Egress Interface is required for SNAT.') });
             return;
         }
 
         if (translationMode === 'specified' && !formTranslatedIp) {
-            setLocalAlert({ isOpen: true, msg: "Please specify the Translated IP." });
+            setLocalAlert({ isOpen: true, msg: t('nat_drawer.error_no_translated_ip', 'Please specify the Translated IP.') });
             return;
         }
 
@@ -113,7 +115,6 @@ export function SnatEditDrawer({ isOpen, onClose, natData, onSuccess, onError }:
             'dst-addr': formDstAddr,
             service: formService,
             'out-interface': formOutIface,
-
             'translated-ip': translationMode === 'specified' ? formTranslatedIp : '',
             description: formDesc
         };
@@ -125,80 +126,133 @@ export function SnatEditDrawer({ isOpen, onClose, natData, onSuccess, onError }:
         }
     };
 
-    const zoneOptions = zones.map(z => ({ label: z.name.toUpperCase(), value: z.name }));
-    const addrOptions = addresses.map(a => ({ label: a.name, value: a.name }));
-    const svcOptions = services.map(s => ({ label: s.name, value: s.name }));
-    const ifaceOptions = interfaces.filter(i => !!i.ip).map(i => ({ label: `${i.name} (${i.ip})`, value: i.name }));
+    const combinedInterfaces = [
+        ...interfaces.filter(i => !!i.ip).map(i => ({ name: i.name, label: `${i.name} (${i.ip})` })),
+        ...vlans.filter(v => !!v.ip).map(v => ({ name: v.name, label: `${v.name} (${v.ip})` }))
+    ];
+
+    const slideOffset = activeNestedDrawer ? '150px' : '0px';
+    const isChildOpen = activeNestedDrawer !== null;
 
     return (
         <>
             <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-                <SheetContent className={`bg-[#09090b] border-l border-zinc-800 text-zinc-100 w-full sm:w-[650px] sm:!max-w-[650px] p-0 flex flex-col h-full shadow-2xl transition-all duration-300 ${localAlert.isOpen ? 'blur-[2px] brightness-50 pointer-events-none' : ''}`}>
-
+                <SheetContent
+                    style={{ right: slideOffset }}
+                    className={`bg-[#09090b] border-l border-zinc-800 text-zinc-100 w-full sm:w-[700px] sm:!max-w-[700px] p-0 flex flex-col h-full shadow-2xl shadow-black transition-all duration-300 z-[50] ${isChildOpen ? 'blur-[2px] brightness-50 pointer-events-none' : ''}`}
+                >
                     <div className="p-6 border-b border-zinc-800 bg-zinc-950/50">
                         <SheetHeader>
                             <SheetTitle className="text-zinc-100 font-mono text-2xl flex items-center gap-3">
                                 <Network className="w-5 h-5 text-emerald-500" />
-                                {isEditMode ? `Edit SNAT Configuration #${natData.id}` : `New SNAT Configuration`}
+                                {isEditMode ? t('nat_drawer.edit_title_snat', { id: natData.id }) : t('nat_drawer.create_title_snat', 'Create SNAT Rule')}
                             </SheetTitle>
+                            <SheetDescription className="text-zinc-400 font-mono text-xs">
+                                {t('nat_drawer.desc_snat', 'Define Source Network Address Translation.')}
+                            </SheetDescription>
                         </SheetHeader>
                     </div>
 
-                    <div className="p-6 space-y-8 flex-1 overflow-y-auto">
+                    <div className="p-6 space-y-6 flex-1 overflow-y-auto">
 
-                        <div className="space-y-4">
-                            <h3 className="text-emerald-500 font-mono text-sm font-bold tracking-widest border-b border-zinc-800 pb-2">Requirements</h3>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <ResourceSelector label="Source Zone" value={formSrcZone} onChange={setFormSrcZone} options={[{label: 'Any', value: ''}, ...zoneOptions]} />
-                                <ResourceSelector label="Destination Zone" value={formDstZone} onChange={setFormDstZone} options={[{label: 'Any', value: ''}, ...zoneOptions]} />
-
-                                <ResourceSelector label="Source Address" value={formSrcAddr} onChange={setFormSrcAddr} options={[{label: 'Any (0.0.0.0/0)', value: ''}, ...addrOptions]} />
-                                <ResourceSelector label="Destination Address" value={formDstAddr} onChange={setFormDstAddr} options={[{label: 'Any (0.0.0.0/0)', value: ''}, ...addrOptions]} />
+                        <div className="grid grid-cols-2 gap-6 p-4 rounded-lg border border-zinc-800/50 bg-zinc-900/20">
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <Label className="text-zinc-500 font-mono text-xs uppercase">{t('nat_drawer.src_zone')}</Label>
+                                    <button onClick={() => setActiveNestedDrawer('zone')} className="text-emerald-500 hover:text-emerald-400 text-[10px] font-mono flex items-center gap-1"><Plus className="w-3 h-3"/> {t('nat_drawer.create_new', 'New')}</button>
+                                </div>
+                                <select value={formSrcZone} onChange={(e) => setFormSrcZone(e.target.value)} className="w-full h-11 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 font-mono focus:ring-1 focus:ring-emerald-500/50 outline-none">
+                                    <option value="">{t('nat_drawer.any', 'ANY')}</option>
+                                    {zones.map(z => <option key={z.name} value={z.name}>{z.name.toUpperCase()}</option>)}
+                                </select>
                             </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <ResourceSelector label="Egress Interface *" value={formOutIface} onChange={setFormOutIface} options={[{label: 'Select Interface...', value: '', disabled: true}, ...ifaceOptions]} />
-                                <ResourceSelector label="Service" value={formService} onChange={setFormService} options={[{label: 'Any', value: ''}, ...svcOptions]} />
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <Label className="text-zinc-500 font-mono text-xs uppercase">{t('nat_drawer.dst_zone')}</Label>
+                                    <button onClick={() => setActiveNestedDrawer('zone')} className="text-emerald-500 hover:text-emerald-400 text-[10px] font-mono flex items-center gap-1"><Plus className="w-3 h-3"/> {t('nat_drawer.create_new', 'New')}</button>
+                                </div>
+                                <select value={formDstZone} onChange={(e) => setFormDstZone(e.target.value)} className="w-full h-11 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 font-mono focus:ring-1 focus:ring-emerald-500/50 outline-none">
+                                    <option value="">{t('nat_drawer.any', 'ANY')}</option>
+                                    {zones.map(z => <option key={z.name} value={z.name}>{z.name.toUpperCase()}</option>)}
+                                </select>
                             </div>
                         </div>
 
-                        <div className="space-y-4">
-                            <h3 className="text-emerald-500 font-mono text-sm font-bold tracking-widest border-b border-zinc-800 pb-2">Translated to</h3>
-
+                        <div className="grid grid-cols-2 gap-6 p-4 rounded-lg border border-zinc-800/50 bg-zinc-900/20">
                             <div className="space-y-3">
-                                <Label className="text-zinc-500 font-mono text-xs uppercase">Translated</Label>
-                                <div className="flex gap-2 p-1 bg-zinc-900 border border-zinc-800 rounded-md inline-flex">
-                                    <button
-                                        type="button"
-                                        onClick={() => setTranslationMode('egress')}
-                                        className={`px-4 py-2 text-xs font-mono rounded transition-colors ${translationMode === 'egress' ? 'bg-[#1890ff] text-white font-bold' : 'text-zinc-400 hover:text-zinc-200'}`}
-                                    >
-                                        Egress IF IP(IPv4)
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setTranslationMode('specified')}
-                                        className={`px-4 py-2 text-xs font-mono rounded transition-colors ${translationMode === 'specified' ? 'bg-[#1890ff] text-white font-bold' : 'text-zinc-400 hover:text-zinc-200'}`}
-                                    >
-                                        Specified IP
-                                    </button>
+                                <div className="flex justify-between items-center">
+                                    <Label className="text-zinc-500 font-mono text-xs uppercase">{t('nat_drawer.src_addr', 'Source Address')}</Label>
+                                    <button onClick={() => setActiveNestedDrawer('address')} className="text-emerald-500 hover:text-emerald-400 text-[10px] font-mono flex items-center gap-1"><Plus className="w-3 h-3"/> {t('nat_drawer.create_new', 'New')}</button>
+                                </div>
+                                <select value={formSrcAddr} onChange={(e) => setFormSrcAddr(e.target.value)} className="w-full h-11 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 font-mono focus:ring-1 focus:ring-emerald-500/50 outline-none">
+                                    <option value="">{t('nat_drawer.any_address', 'Any (0.0.0.0/0)')}</option>
+                                    {addresses.map(a => <option key={a.name} value={a.name}>{a.name}</option>)}
+                                </select>
+                            </div>
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <Label className="text-zinc-500 font-mono text-xs uppercase">{t('nat_drawer.dst_addr', 'Destination Address')}</Label>
+                                    <button onClick={() => setActiveNestedDrawer('address')} className="text-emerald-500 hover:text-emerald-400 text-[10px] font-mono flex items-center gap-1"><Plus className="w-3 h-3"/> {t('nat_drawer.create_new', 'New')}</button>
+                                </div>
+                                <select value={formDstAddr} onChange={(e) => setFormDstAddr(e.target.value)} className="w-full h-11 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 font-mono focus:ring-1 focus:ring-emerald-500/50 outline-none">
+                                    <option value="">{t('nat_drawer.any_address', 'Any (0.0.0.0/0)')}</option>
+                                    {addresses.map(a => <option key={a.name} value={a.name}>{a.name}</option>)}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6 p-4 rounded-lg border border-zinc-800/50 bg-zinc-900/20">
+                            <div className="space-y-3">
+                                <Label className="text-emerald-500 font-mono text-xs uppercase font-bold">{t('nat_drawer.out_iface', 'Egress Interface')} *</Label>
+                                <select value={formOutIface} onChange={(e) => setFormOutIface(e.target.value)} className="w-full h-11 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-emerald-400 font-mono focus:ring-1 focus:ring-emerald-500/50 outline-none">
+                                    <option value="" disabled>{t('nat_drawer.select_iface', 'Select Interface...')}</option>
+                                    {combinedInterfaces.map(i => <option key={i.name} value={i.name}>{i.label}</option>)}
+                                </select>
+                            </div>
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <Label className="text-zinc-500 font-mono text-xs uppercase">{t('nat_drawer.service', 'Service')}</Label>
+                                    <button onClick={() => setActiveNestedDrawer('service')} className="text-emerald-500 hover:text-emerald-400 text-[10px] font-mono flex items-center gap-1"><Plus className="w-3 h-3"/> {t('nat_drawer.create_new', 'New')}</button>
+                                </div>
+                                <select value={formService} onChange={(e) => setFormService(e.target.value)} className="w-full h-11 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 font-mono focus:ring-1 focus:ring-emerald-500/50 outline-none">
+                                    <option value="">{t('nat_drawer.any', 'ANY')}</option>
+                                    {services.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="pt-2 space-y-6">
+                            <div className="space-y-3">
+                                <Label className="text-blue-400 font-mono text-xs uppercase flex items-center justify-between">
+                                    {t('nat_drawer.translated_to', 'Translated To')}
+                                </Label>
+                                <div className="flex gap-4">
+                                    <label className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer transition-colors ${translationMode === 'egress' ? 'border-blue-500 bg-blue-500/10 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.1)]' : 'border-zinc-800 bg-zinc-900/30 text-zinc-500 hover:bg-zinc-800'}`}>
+                                        <input type="radio" value="egress" checked={translationMode === 'egress'} onChange={() => setTranslationMode('egress')} className="hidden" />
+                                        {t('nat_drawer.egress_ip', 'Egress IF IP (Masquerade)')}
+                                    </label>
+                                    <label className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer transition-colors ${translationMode === 'specified' ? 'border-blue-500 bg-blue-500/10 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.1)]' : 'border-zinc-800 bg-zinc-900/30 text-zinc-500 hover:bg-zinc-800'}`}>
+                                        <input type="radio" value="specified" checked={translationMode === 'specified'} onChange={() => setTranslationMode('specified')} className="hidden" />
+                                        {t('nat_drawer.specified_ip', 'Specified IP (Static)')}
+                                    </label>
                                 </div>
                             </div>
 
                             {translationMode === 'specified' && (
-                                <div className="space-y-3 pt-2 animate-in fade-in slide-in-from-top-2">
-                                    <Label className="text-zinc-500 font-mono text-xs uppercase text-emerald-400">Translated IP Object *</Label>
-                                    <ResourceSelector label="" value={formTranslatedIp} onChange={setFormTranslatedIp} options={[{label: 'Select Object...', value: '', disabled: true}, ...addrOptions]} />
+                                <div className="space-y-3 animate-in fade-in slide-in-from-top-2 p-4 rounded-lg border border-zinc-800/50 bg-zinc-900/20">
+                                    <div className="flex justify-between items-center">
+                                        <Label className="text-blue-400 font-mono text-xs uppercase">{t('nat_drawer.translated_ip_obj', 'Translated IP Object')} *</Label>
+                                        <button onClick={() => setActiveNestedDrawer('address')} className="text-blue-400 hover:text-blue-300 text-[10px] font-mono flex items-center gap-1"><Plus className="w-3 h-3"/> {t('nat_drawer.create_new', 'New')}</button>
+                                    </div>
+                                    <select value={formTranslatedIp} onChange={(e) => setFormTranslatedIp(e.target.value)} className="w-full h-11 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-blue-400 font-mono focus:ring-1 focus:ring-blue-500/50 outline-none">
+                                        <option value="" disabled>{t('nat_drawer.select_obj', 'Select Object...')}</option>
+                                        {addresses.map(a => <option key={a.name} value={a.name}>{a.name}</option>)}
+                                    </select>
                                 </div>
                             )}
-                        </div>
 
-
-                        <div className="space-y-4">
-                            <h3 className="text-zinc-500 font-mono text-sm font-bold tracking-widest border-b border-zinc-800 pb-2">Others</h3>
                             <div className="space-y-3">
-                                <Label className="text-zinc-500 font-mono text-xs uppercase">Description</Label>
+                                <Label className="text-zinc-500 font-mono text-xs uppercase">{t('nat_drawer.description', 'Description')}</Label>
                                 <Input value={formDesc} onChange={(e) => setFormDesc(e.target.value)} className="bg-zinc-950 border-zinc-800 text-zinc-300 font-mono h-11 focus-visible:ring-emerald-500/50" placeholder="(0 - 63) chars" />
                             </div>
                         </div>
@@ -207,16 +261,20 @@ export function SnatEditDrawer({ isOpen, onClose, natData, onSuccess, onError }:
 
                     <div className="p-6 border-t border-zinc-800 bg-zinc-950/50 flex justify-end gap-3">
                         <Button variant="outline" onClick={onClose} className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 font-mono uppercase text-xs w-24">
-                            Cancel
+                            {t('nat_drawer.cancel', 'Cancel')}
                         </Button>
-                        <Button onClick={handleSave} disabled={isLoading} className="bg-[#1890ff] hover:bg-blue-500 text-white font-mono uppercase text-xs w-36 border-none">
-                            <Save className="w-4 h-4 mr-2" /> {isLoading ? 'Saving...' : 'OK'}
+                        <Button onClick={handleSave} disabled={isLoading} className="bg-emerald-600 hover:bg-emerald-500 text-white font-mono uppercase text-xs w-36">
+                            <Save className="w-4 h-4 mr-2" /> {isLoading ? t('nat_drawer.saving', 'Saving...') : t('nat_drawer.apply', 'Apply')}
                         </Button>
                     </div>
                 </SheetContent>
             </Sheet>
 
-            <AlertModal isOpen={localAlert.isOpen} type="error" title="Validation Error" message={localAlert.msg} onCancel={() => setLocalAlert({ isOpen: false, msg: '' })} />
+            <AlertModal isOpen={localAlert.isOpen} type="error" title={t('nat_drawer.error')} message={localAlert.msg} onCancel={() => setLocalAlert({ isOpen: false, msg: '' })} />
+
+            {activeNestedDrawer === 'zone' && <ZoneEditDrawer isOpen={true} onClose={() => setActiveNestedDrawer(null)} zoneData={null} onSuccess={fetchZones} />}
+            {activeNestedDrawer === 'address' && <AddressEditDrawer isOpen={true} onClose={() => setActiveNestedDrawer(null)} addressData={null} onSuccess={fetchAddresses} />}
+            {activeNestedDrawer === 'service' && <ServiceEditDrawer isOpen={true} onClose={() => setActiveNestedDrawer(null)} serviceData={null} onSuccess={fetchServices} />}
         </>
     );
 }
