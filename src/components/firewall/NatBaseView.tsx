@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNat, NatRuleInterface } from '@/hooks/useNat';
@@ -12,20 +13,21 @@ import { TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Edit2, Trash2 } from 'lucide-react';
 
-import { NatEditDrawer } from './NatDrawer';
+import { SnatEditDrawer } from './SnatDrawer';
+import { DnatEditDrawer } from './DnatDrawer';
 import { SortableNatRow } from './SortableNatRow';
 
 
 import { ZoneBadge } from '@/components/firewall/FirewallBadges';
 
 interface NatBaseViewProps {
-    typeFilter: 'snat' | 'dnat-ip' | 'dnat-port' | 'dnat';
+    viewType: 'snat' | 'dnat'; // Esto le dice qué Drawer abrir
     titleKey: string;
     descKey: string;
     addBtnKey: string;
 }
 
-export function NatBaseView({ typeFilter, titleKey, descKey, addBtnKey }: NatBaseViewProps) {
+export function NatBaseView({ viewType, titleKey, descKey, addBtnKey }: NatBaseViewProps) {
     const { t } = useTranslation();
     const { natRules, fetchNatRules, deleteNatRule, moveNatRule, isLoading } = useNat();
 
@@ -41,8 +43,8 @@ export function NatBaseView({ typeFilter, titleKey, descKey, addBtnKey }: NatBas
     );
 
     useEffect(() => {
-        fetchNatRules(typeFilter as any);
-    }, [typeFilter, fetchNatRules]);
+        fetchNatRules(viewType as any);
+    }, [viewType, fetchNatRules]);
 
     useEffect(() => {
         setLocalRules(natRules);
@@ -65,7 +67,7 @@ export function NatBaseView({ typeFilter, titleKey, descKey, addBtnKey }: NatBas
     const confirmDelete = async () => {
         const success = await deleteNatRule(deleteConfirm.id);
         if (success) {
-            fetchNatRules(typeFilter as any);
+            fetchNatRules(viewType as any);
         } else {
             setBackendError(t('nat.config_error'));
         }
@@ -79,10 +81,8 @@ export function NatBaseView({ typeFilter, titleKey, descKey, addBtnKey }: NatBas
         const oldIndex = localRules.findIndex((r) => r.id === active.id);
         const newIndex = localRules.findIndex((r) => r.id === over.id);
 
-
         const newArr = arrayMove(localRules, oldIndex, newIndex);
         setLocalRules(newArr);
-
 
         const position = newIndex > oldIndex ? 'after' : 'before';
         const referenceId = over.id as number;
@@ -90,16 +90,17 @@ export function NatBaseView({ typeFilter, titleKey, descKey, addBtnKey }: NatBas
         const success = await moveNatRule(active.id as number, position, referenceId);
         if (!success) {
             setBackendError(t('nat.config_error'));
-            fetchNatRules(typeFilter as any);
+            fetchNatRules(viewType as any);
         }
     };
 
+    // Columnas genéricas que sirven para ambos tipos de NAT
     const tableColumns = [
         { label: "ID", className: "w-[80px] text-center" },
-        { label: t('nat_drawer.src_zone') },
-        { label: t('nat_drawer.dst_zone') },
-        { label: t('nat_drawer.out_iface') },
-        { label: t('nat_drawer.description') },
+        { label: t('nat_drawer.src_zone', 'Source') },
+        { label: t('nat_drawer.dst_zone', 'Destination') },
+        { label: "Translation", className: "text-emerald-400" },
+        { label: t('nat_drawer.description', 'Description') },
         { label: "", className: "text-right" }
     ];
 
@@ -109,7 +110,7 @@ export function NatBaseView({ typeFilter, titleKey, descKey, addBtnKey }: NatBas
                 title={t(titleKey)}
                 description={t(descKey)}
                 isLoading={isLoading}
-                onRefresh={() => fetchNatRules(typeFilter as any)}
+                onRefresh={() => fetchNatRules(viewType as any)}
                 onAdd={handleAddClick}
                 addText={t(addBtnKey)}
             />
@@ -139,38 +140,40 @@ export function NatBaseView({ typeFilter, titleKey, descKey, addBtnKey }: NatBas
                         {localRules.map((rule) => (
                             <SortableNatRow key={rule.id} id={rule.id}>
 
-                                <TableCell className="font-mono text-zinc-500 text-center text-xs">
-                                    #{rule.id}
+                                <TableCell className="font-mono text-zinc-500 text-center text-xs">#{rule.id}</TableCell>
+
+                                <TableCell>
+                                    <div className="flex flex-col gap-1">
+                                        {rule['src-zone'] ? <ZoneBadge zone={rule['src-zone']} /> : <span className="font-mono text-[10px] text-zinc-500">ANY ZONE</span>}
+                                        <span className="font-mono text-[10px] text-zinc-400">{rule['src-addr'] || 'ANY IP'}</span>
+                                    </div>
                                 </TableCell>
 
                                 <TableCell>
-                                    {rule['src-zone'] ? <ZoneBadge zone={rule['src-zone']} /> : <span className="font-mono text-xs text-zinc-500">{t('nat_drawer.any')}</span>}
+                                    <div className="flex flex-col gap-1">
+                                        {rule['dst-zone'] ? <ZoneBadge zone={rule['dst-zone']} /> : <span className="font-mono text-[10px] text-zinc-500">ANY ZONE</span>}
+                                        <span className="font-mono text-[10px] text-zinc-400">{rule['dst-addr'] || 'ANY IP'}</span>
+                                    </div>
                                 </TableCell>
 
                                 <TableCell>
-                                    {rule['dst-zone'] ? <ZoneBadge zone={rule['dst-zone']} /> : <span className="font-mono text-xs text-zinc-500">{t('nat_drawer.any')}</span>}
+                                    <div className="flex flex-col gap-1 font-mono text-[10px]">
+                                        <span className="text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 rounded inline-block w-fit">
+                                            {rule.type.toUpperCase()}
+                                        </span>
+                                        <span className="text-zinc-300">
+                                            {rule['translated-ip'] || (rule.type === 'snat' ? `MASQ (${rule['out-interface']})` : '-')}
+                                            {rule['translated-port'] && ` : ${rule['translated-port']}`}
+                                        </span>
+                                    </div>
                                 </TableCell>
 
-                                <TableCell>
-                                    <span className="font-mono text-xs text-emerald-400">
-                                        {rule['out-interface'] || <span className="text-zinc-500">{t('nat_drawer.any')}</span>}
-                                    </span>
-                                </TableCell>
-
-                                <TableCell>
-                                    <span className="font-mono text-xs text-zinc-400">
-                                        {rule.description || '-'}
-                                    </span>
-                                </TableCell>
+                                <TableCell><span className="font-mono text-xs text-zinc-400">{rule.description || '-'}</span></TableCell>
 
                                 <TableCell className="text-right relative z-20">
                                     <div className="flex justify-end gap-1 opacity-50 group-hover:opacity-100 transition-all">
-                                        <Button variant="outline" size="icon" onClick={() => handleEditClick(rule)} className="h-8 w-8 bg-transparent border-transparent text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors">
-                                            <Edit2 className="w-4 h-4" />
-                                        </Button>
-                                        <Button variant="outline" size="icon" onClick={() => initiateDelete(rule.id)} className="h-8 w-8 bg-transparent border-transparent text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors">
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
+                                        <Button variant="outline" size="icon" onClick={() => handleEditClick(rule)} className="h-8 w-8 bg-transparent border-transparent text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors"><Edit2 className="w-4 h-4" /></Button>
+                                        <Button variant="outline" size="icon" onClick={() => initiateDelete(rule.id)} className="h-8 w-8 bg-transparent border-transparent text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"><Trash2 className="w-4 h-4" /></Button>
                                     </div>
                                 </TableCell>
 
@@ -180,18 +183,13 @@ export function NatBaseView({ typeFilter, titleKey, descKey, addBtnKey }: NatBas
                 </FirewallTable>
             </DndContext>
 
-            {isDrawerOpen && (
-                <NatEditDrawer
-                    isOpen={isDrawerOpen}
-                    onClose={() => setIsDrawerOpen(false)}
-                    natData={selectedRule}
-                    defaultAction={typeFilter as any}
-                    onSuccess={() => fetchNatRules(typeFilter as any)}
-                    onError={(msg) => {
-                        setIsDrawerOpen(false);
-                        setBackendError(msg);
-                    }}
-                />
+
+            {isDrawerOpen && viewType === 'snat' && (
+                <SnatEditDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} natData={selectedRule} onSuccess={() => fetchNatRules(viewType as any)} onError={(msg) => { setIsDrawerOpen(false); setBackendError(msg); }} />
+            )}
+
+            {isDrawerOpen && viewType === 'dnat' && (
+                <DnatEditDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} natData={selectedRule} onSuccess={() => fetchNatRules(viewType as any)} onError={(msg) => { setIsDrawerOpen(false); setBackendError(msg); }} />
             )}
         </div>
     );
