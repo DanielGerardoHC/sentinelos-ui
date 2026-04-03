@@ -16,7 +16,10 @@
     "saving": "Saving...",
     "error": "Validation Error",
     "req_action": "Action is required",
-    "any": "ANY"
+    "any": "ANY",
+    "translated_ip": "Translated IPv4 Address",
+    "ip_only_hint": "Enter a single IPv4 address without subnet mask.",
+    "mapped_to": "Mapped To (Internal IPv4)"
   },
   "nat": {
     "empty_msg": "No NAT rules configured",

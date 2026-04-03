@@ -16,7 +16,10 @@
     "saving": "Guardando...",
     "error": "Error de Validación",
     "req_action": "La acción es obligatoria",
-    "any": "CUALQUIERA"
+    "any": "CUALQUIERA",
+    "translated_ip": "Dirección IPv4 Traducida",
+    "ip_only_hint": "Ingrese una sola dirección IPv4 sin máscara de subred.",
+    "mapped_to": "Mapeado A (IPv4 Interna)"
   },
   "nat": {
     "empty_msg": "No hay reglas NAT configuradas",

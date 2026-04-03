@@ -94,9 +94,10 @@ export function NatBaseView({ viewType, titleKey, descKey, addBtnKey }: NatBaseV
         }
     };
 
-    // Columnas genéricas que sirven para ambos tipos de NAT
+
     const tableColumns = [
-        { label: "ID", className: "w-[80px] text-center" },
+        { label: "", className: "w-[40px]" },
+        { label: "ID", className: "w-[60px] text-center" },
         { label: t('nat_drawer.src_zone', 'Source') },
         { label: t('nat_drawer.dst_zone', 'Destination') },
         { label: "Translation", className: "text-emerald-400" },
@@ -140,7 +141,9 @@ export function NatBaseView({ viewType, titleKey, descKey, addBtnKey }: NatBaseV
                         {localRules.map((rule) => (
                             <SortableNatRow key={rule.id} id={rule.id}>
 
-                                <TableCell className="font-mono text-zinc-500 text-center text-xs">#{rule.id}</TableCell>
+                                <TableCell className="font-mono text-zinc-500 text-center font-bold text-xs">
+                                    #{rule.id}
+                                </TableCell>
 
                                 <TableCell>
                                     <div className="flex flex-col gap-1">
