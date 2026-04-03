@@ -34,10 +34,10 @@ const sidebarData: Record<string, MenuItem[]> = {
     ],
     policies: [
         { key: 'sidebar.policies.rules', fallback: 'Security Rules', link: '/policies/rules' },
-        { key: 'sidebar.policies.nat', fallback: 'NAT', link: '/policies/nat',
-          subItems: [{ key: 'sidebar.snat', fallback: 'S-NAT', link: '/network/nat/snat' },
-                     { key: 'sidebar.dnat', fallback: 'D-NAT', link: '/network/nat/dnat' },
-                     { key: 'sidebar.mnat', fallback: 'M-NAT', link: '/network/nat/mnat' },
+        { key: 'sidebar.policies.nat', fallback: 'NAT', link: '',
+          subItems: [{ key: 'sidebar.snat', fallback: 'S-NAT', link: '/policies/nat/snat' },
+                     { key: 'sidebar.dnat', fallback: 'D-NAT', link: '/policies/nat/dnat' },
+                     { key: 'sidebar.mnat', fallback: 'M-NAT', link: '/policies/nat/mnat' },
           ]
         },
         { key: 'sidebar.policies.binding', fallback: 'IP-MAC Binding', link: '/policies/binding' },
