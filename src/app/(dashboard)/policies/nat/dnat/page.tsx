@@ -1,3 +1,4 @@
+"use client";
 import { NatBaseView } from '@/components/firewall/NatBaseView';
 
 export default function DnatPage() {
