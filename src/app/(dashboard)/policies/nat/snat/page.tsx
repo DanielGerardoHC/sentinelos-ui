@@ -116,7 +116,7 @@ export default function SnatPage() {
                                 <TableCell>
                                     <div className="flex flex-col gap-1 font-mono text-xs">
                                         {rule['translated-ip'] ? (
-                                            <span className="text-emerald-400">{rule['translated-ip']} <span className="text-zinc-500 text-[10px]">({t('snat.static_lbl')})</span></span>
+                                            <span className="text-emerald-400">{rule['translated-ip']} </span>
                                         ) : (
                                             <span className="text-emerald-400">{t('snat.masq_lbl')} <span className="text-zinc-500 text-[10px]">({rule['out-interface']})</span></span>
                                         )}
